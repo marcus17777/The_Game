@@ -100,11 +100,4 @@ class Map(vars.Variables):
                 if abs(direction[0]) + abs(direction[0]) == 2:
                     self.generate_map((new_map_idx[0], current_map_idx[1]))
                     self.generate_map((current_map_idx[0], new_map_idx[1]))"""
-
-
-
-
-
-
-
-#generate_map(0, 0)
+               
