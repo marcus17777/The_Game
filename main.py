@@ -1,7 +1,9 @@
-__author__ = 'Markus Peterson'
-
 import sys, os, pygame, tkinter
 import vars, in_game
+
+__author__ = 'Markus Peterson'
+
+
 
 class Main(vars.Variables):
     def __init__(self):

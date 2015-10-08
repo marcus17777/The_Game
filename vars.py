@@ -1,18 +1,18 @@
 __author__ = 'Markus Peterson'
 
+
 class Variables:
     # SCREEN
-    # screen_width = 1080
-    # screen_height = 720
-    screen_width = 1000
+    screen_width = 1600
     screen_height = 900
 
-
-    # MAP
-    world_map_width = 50
-    world_map_height = 50
+    # MAP_GEN
+    world_map_width = 64
+    world_map_height = 64
     world_map_block_size = 8
+
     world_map_octaves = 2
+    world_map_frequency = 16 * world_map_octaves
     world_map_gen_threshold = 3
 
     # MINIMAP
@@ -23,7 +23,7 @@ class Variables:
     # COLORS
     world_map_colors = {
          0: ( 10,  10,  10),
-         1: ( 70,  70,  70),
+        1: (0, 100, 0),
          2: ( 80,  80,  80),
          3: ( 45,   0,   0),
          4: (100,   0, 100),
