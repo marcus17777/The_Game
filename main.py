@@ -1,9 +1,10 @@
-import sys, os, pygame, tkinter
+import sys, os, pygame, tkinter, threading, multiprocessing
 import vars, in_game
 
 __author__ = 'Markus Peterson'
 
 
+# TODO Make some menu somehere in Tk
 
 class Main(vars.Variables):
     def __init__(self):
@@ -18,6 +19,7 @@ class Main(vars.Variables):
         # pygame
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.init()
+        pygame.font.init()
         pygame.display.set_caption('The Game')
         self.PygameFrame.focus_set()
         self.screen.fill((80, 80, 80))
@@ -25,8 +27,7 @@ class Main(vars.Variables):
         self.ms = self.clock.tick(50)
 
         #The Game
-        self.game = in_game.Game(master=self.root)
-
+        self.game = in_game.Game(self.screen, self.ms, master=self.root)
 
     def run(self):
         while True:
@@ -41,7 +42,7 @@ class Main(vars.Variables):
 
             self.ms = self.clock.tick(200)
             self.screen.fill((80, 80, 80))
-            self.game.draw(self.screen, self.ms)
+            self.game.map_draw(self.screen, self.ms)
             pygame.display.flip()
             self.root.update()
 

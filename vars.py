@@ -1,19 +1,27 @@
 __author__ = 'Markus Peterson'
+import random, argparse
+
+# TODO argparser for seed input from command line ^.^ DONE
+argparser = argparse.ArgumentParser(description='Mäng')
+argparser.add_argument('seed', help='sisesta, et genereerida kindel kaart', default=None, nargs='?')
+args = argparser.parse_args()
 
 
 class Variables:
     # SCREEN
-    screen_width = 1600
+    screen_width = 1200
     screen_height = 900
 
     # MAP_GEN
-    world_map_width = 64
-    world_map_height = 64
-    world_map_block_size = 8
+    world_map_width = 128
+    world_map_height = 128
+    world_map_block_size = 4
+    world_map_gen_seed = int(args.seed) if args.seed is not None else random.random()
 
     world_map_octaves = 2
     world_map_frequency = 16 * world_map_octaves
-    world_map_gen_threshold = 3
+    world_map_gen_threshold_x = 20
+    world_map_gen_threshold_y = 20
 
     # MINIMAP
     minimap_width = 150
@@ -23,8 +31,8 @@ class Variables:
     # COLORS
     world_map_colors = {
          0: ( 10,  10,  10),
-        1: (0, 100, 0),
-         2: ( 80,  80,  80),
+        1: (100, 0, 0),
+        2: (0, 0, 255),
          3: ( 45,   0,   0),
          4: (100,   0, 100),
         11: (100, 100,  10),
