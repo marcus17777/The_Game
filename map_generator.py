@@ -1,4 +1,4 @@
-import noise, pygame, operator, os
+import noise, pygame, operator, os, multiprocessing
 import vars
 
 __author__ = 'Markus Peterson'

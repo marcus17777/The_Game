@@ -1,4 +1,4 @@
-import sys, os, pygame, tkinter, threading, multiprocessing
+import sys, os, pygame, tkinter, multiprocessing
 import vars, in_game
 
 __author__ = 'Markus Peterson'
@@ -47,5 +47,14 @@ class Main(vars.Variables):
             self.root.update()
 
 
-game = Main()
-game.run()
+if __name__ == '__main__':
+    # Start worker processes
+    num_consumers = multiprocessing.cpu_count() * 1
+    workers = [in_game.Worker(vars.Variables.tasks, vars.Variables.results) for i in range(num_consumers)]
+    for worker in workers:
+        worker.start()
+    for worker in workers:
+        print(worker.is_alive())
+
+    game = Main()
+    game.run()

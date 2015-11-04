@@ -1,4 +1,4 @@
-import pygame, tkinter, multiprocessing, threading
+import pygame, tkinter, multiprocessing
 import vars, map_generator, game_classes
 
 
@@ -16,6 +16,32 @@ def fps_counter(screen, ms):
 #"""
 
 
+class Worker(multiprocessing.Process):
+    def __init__(self, task_queue, result_queue):
+        """
+            Worker that takes tasks and executes them in another process and returns value.
+
+        :param task_queue: Queue where all the tasks that have to be executed are stored here.
+        :param result_queue: Queue where all the returns of tasks are stored
+        """
+        multiprocessing.Process.__init__(self)
+        self.task_queue = task_queue
+        self.result_queue = result_queue
+
+    def run(self):
+        """
+            Just a override (sort of) of default multiprocess.Process run method.
+            Executes tasks.
+        """
+        while True:
+            next_task = self.task_queue.get()
+            if next_task is None:
+                self.task_queue.task_done()
+                break
+            answer = next_task()
+            self.task_queue.task_done()
+            self.result_queue.put(answer)
+
 class Game(vars.Variables, tkinter.Frame):
     def __init__(self, screen, ms, master=None):
         vars.Variables.__init__(self)
@@ -30,13 +56,6 @@ class Game(vars.Variables, tkinter.Frame):
         self.frame.pack(side='right')
         self.textbox = tkinter.Text(master=self.frame, width=16, height=4)
         self.textbox.pack()
-
-        # self.map_generator = threading.Thread(target=self.map_generation)
-        # self.map_drawer = threading.Thread(target=self.map_draw, args=(screen, ms))
-        # self.map_generator.daemon = True
-        # self.map_drawer.daemon = True
-        # self.map_generator.start()
-        #self.map_drawer.start()
 
     def get_vars(self):
         self.mouse_pos = pygame.mouse.get_pos()

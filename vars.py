@@ -1,5 +1,5 @@
 __author__ = 'Markus Peterson'
-import random, argparse
+import random, argparse, multiprocessing
 
 # TODO argparser for seed input from command line ^.^ DONE
 argparser = argparse.ArgumentParser(description='Mäng')
@@ -27,6 +27,11 @@ class Variables:
     minimap_width = 150
     minimap_height = 150
     minimap_block_size = 2
+
+    # JUST SOME VARS FOR WORKERS
+    # Establish communication queues with workers
+    tasks = multiprocessing.JoinableQueue()
+    results = multiprocessing.Queue()
 
     # COLORS
     world_map_colors = {
