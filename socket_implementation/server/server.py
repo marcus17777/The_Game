@@ -15,6 +15,7 @@ class Server(variables.Variables):
         self.serveraddr = (serveraddr, serverport)
 
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # self.listener.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.listener.bind(self.serveraddr)
         print(self.listener)
 
@@ -25,6 +26,7 @@ class Server(variables.Variables):
         self.players = {}
         self.particles = {}
         self.max_players = max_players
+        self.Map_Generator = map_generator.Map()
 
     def run(self):
         try:
@@ -41,7 +43,12 @@ class Server(variables.Variables):
                         print(cmd, msg)
 
                         if 'new connection' in cmd:
-                            self.players[addr] = msg
+                            self.players[addr] = [0, 0]
+                            print(self.players)
+
+                        elif 'disconnect' in cmd:
+                            del self.players[addr]
+                            print(self.players)
 
                         elif 'request' in cmd:
                             if 'player_positions' in cmd:
@@ -51,17 +58,22 @@ class Server(variables.Variables):
                                 if msg in self.variables:
                                     self.listener.sendto(pickle.dumps(('respond variable', (eval('self.' + msg)))),
                                                          addr)
+                            elif 'map_chunk' in cmd:
+                                self.listener.sendto(
+                                    pickle.dumps(('respond map_chunk', (self.Map_Generator.get_chunk(msg), msg))), addr)
 
                         elif 'update' in cmd:
                             if 'player position' in cmd:
                                 self.players[addr] = msg
-
-                                # TODO flag and command control.
-
+                                for key, value in self.players.items():
+                                    # self.listener.sendto(pickle.dumps(('update player position', value)), key)
+                                    # """
+                                    if key != addr:
+                                        self.listener.sendto(pickle.dumps(('update player position', value)), key)  #"""
         finally:
             pass
 
 
 if __name__ == '__main__':
-    g = Server()
+    g = Server(serveraddr='192.168.1.176', serverport=8000)
     g.run()

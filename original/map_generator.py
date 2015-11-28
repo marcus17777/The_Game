@@ -2,6 +2,7 @@ import operator
 import os
 import noise
 import pygame
+import itertools
 from original import variables
 
 __author__ = 'Markus Peterson'
@@ -10,18 +11,16 @@ __author__ = 'Markus Peterson'
 # TODO add some seed generator DONE.
 # TODO add some minerals that spawn pretty randomly between red blocks. Add some rarity argument too.
 
-class Map(variables.Variables):
-    def __init__(self):
+class Map_Generator(variables.Variables):
+    def __init__(self, ):
         """
             The class that holds all map_chunks and surfaces of all map_chunks.
         """
-        self.map_chunks = {}
-        self.map_chunk_surfaces = {}
         self.map_directory = 'maps/seed=%s/' % self.world_map_gen_seed
         os.makedirs(self.map_directory, exist_ok=True)
         self.current_map_idx = (0, 0)
-        self.generate_map_chunk((0, 0))
-        # for dx, dy in itertools.product(range(-1, 2), repeat=2): self.generate_map_chunk((dx, dy))
+        # self.generate_map_chunk((0, 0))
+        for dx, dy in itertools.product(range(-1, 2), repeat=2): self.generate_map_chunk((dx, dy))
 
     def generate_map_chunk(self, xy):
         """
@@ -56,8 +55,15 @@ class Map(variables.Variables):
                 # f.write("%s" % block)
                 # f.write('\n')
         # f.close()
-        self.map_chunks[xy] = temp_map
+        variables.Variables.map_chunks[xy] = temp_map
         self.create_map_chunk_surface(xy)
+
+    def change_block(self, pos, new_id):
+        map_chunk_id = (pos[0] // self.world_map_width,
+                        pos[1] // self.world_map_height)
+        pos_on_map = (pos[0] % self.world_map_width,
+                      pos[1] % self.world_map_height)
+        self.map_chunks[map_chunk_id][pos_on_map[0]][pos_on_map[1]] = new_id
 
     def create_map_chunk_surface(self, xy):
         """
@@ -65,7 +71,7 @@ class Map(variables.Variables):
 
         :param xy: Position of the map_chunk on the whole map.
         """
-        self.map_chunk_surfaces[xy] = pygame.Surface((self.world_map_width * self.world_map_block_size,
+        variables.Variables.map_chunk_surfaces[xy] = pygame.Surface((self.world_map_width * self.world_map_block_size,
                                                       self.world_map_height * self.world_map_block_size))
 
         for m in range(self.world_map_height):

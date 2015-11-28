@@ -1,4 +1,6 @@
-import random, argparse, multiprocessing
+import random
+import argparse
+import pygame
 
 __author__ = 'Markus Peterson'
 
@@ -12,20 +14,32 @@ class Variables:
     """
         Just a class to store variables. Can be used as a parent class for easy access in every module.
     """
+    # MODULES
+    module_ingame = None
+    module_map_generator = None
+    module_game_classes = None
+    module_spells = None
+
     # SCREEN
-    screen_width = 1200
+    screen_width = 1600
     screen_height = 900
+    camera_pos = []
 
     # MAP_GEN
     world_map_width = 64
     world_map_height = 64
-    world_map_block_size = 4
+    world_map_block_size = 16
     world_map_gen_seed = int(args.seed) if args.seed is not None else random.random()
+    map_chunks = {}
+    map_chunk_surfaces = {}
 
     world_map_octaves = 2
     world_map_frequency = 16 * world_map_octaves
-    world_map_gen_threshold_x = 20
-    world_map_gen_threshold_y = 20
+    world_map_gen_threshold_x = 40
+    world_map_gen_threshold_y = 40
+
+    # PARTICLES AND SPELLS
+    spell_group = pygame.sprite.Group()
 
     # MINIMAP
     minimap_width = 150

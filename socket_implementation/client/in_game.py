@@ -1,8 +1,9 @@
 import tkinter
 import pygame
-from original import map_generator
-from original import variables
-from original import game_classes
+# from original import map_generator
+from socket_implementation.client import variables
+from socket_implementation.client import game_classes
+from socket_implementation.client import game_map
 
 __author__ = 'Markus Peterson'
 
@@ -36,8 +37,9 @@ class Game(variables.Variables, tkinter.Frame):
         :param master: The parent of the current tkinter.Frame.
         """
         variables.Variables.__init__(self)
+        tkinter.Frame.__init__(self)
         self.master = master
-        self.World_map = map_generator.Map()
+        self.World_map = game_map.World_Map()
         self.camera_pos = [0, 0]
         self.mainplayer = game_classes.Player([self.world_map_width // 2, self.world_map_height // 2])
         # self.minimap = Minimap()
@@ -65,6 +67,18 @@ class Game(variables.Variables, tkinter.Frame):
             self.textbox.insert(1.0, self.mainplayer.around[3 * i:3 * (i + 1)])
             self.textbox.insert(1.0, "\n")
 
+    def draw_all_other_players(self, screen, camera_pos):
+        print(self.players)
+        for pos in self.players.values():
+            try:
+                pos = list(map(int, pos))
+                pygame.draw.rect(screen, (0, 100, 0), (
+                    pos[0] + camera_pos[0], pos[1] + camera_pos[1], self.world_map_block_size,
+                    self.world_map_block_size))
+            except:
+                pass
+
+
     def map_draw(self, screen, ms):
         """
             Function that draws the game onto the screen surface.
@@ -76,10 +90,11 @@ class Game(variables.Variables, tkinter.Frame):
             self.mainplayer.pos[0] + 1) * self.world_map_block_size,
                            (self.screen_height // 2 - (self.mainplayer.pos[1] + 1) * self.world_map_block_size)]
 
-        self.World_map.blit_all_maps(screen, self.camera_pos)
-        self.World_map.create_new_chunk(self.mainplayer.pos)
+        # self.World_map.blit_all_maps(screen, self.camera_pos)
+        # self.World_map.create_new_chunk(self.mainplayer.pos)
         # fps_counter(screen, ms)
-        self.mainplayer.update(screen, ms, self.World_map.map_chunks[self.World_map.current_map_idx])
+        self.mainplayer.update(screen, ms, [])  # self.World_map.get_chunk(self.World_map.current_map_idx))
+        self.draw_all_other_players(screen, self.camera_pos)
         self.display_collision()
 
     def on_event(self, event):
@@ -102,7 +117,7 @@ class Game(variables.Variables, tkinter.Frame):
                 self.mainplayer.move('right')
 
             elif event.key == pygame.K_p:
-                pygame.image.save(self.World_map.map_chunk_surfaces[self.World_map.current_map_idx],
+                pygame.image.save(self.World_map.map_chunks_surfaces[self.World_map.current_map_idx],
                                   ('pics/pic[' + ", ".join(tuple(map(str, self.World_map.current_map_idx)))) + '].jpeg')
 
         elif event.type == pygame.KEYUP:

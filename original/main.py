@@ -4,6 +4,10 @@ import tkinter
 import pygame
 from original import variables
 from original import in_game
+from original import map_generator
+from original import game_classes
+from original import spells
+
 __author__ = 'Markus Peterson'
 
 
@@ -15,6 +19,12 @@ class Main(variables.Variables):
             Main class that hooks everything up and runs the game.
         """
         # setting things up
+        # modules to be accessible from everywhere
+        variables.Variables.module_ingame = in_game
+        variables.Variables.module_map_generator = map_generator
+        variables.Variables.module_game_classes = game_classes
+        variables.Variables.module_spells = spells
+
         # tkinter frame
         self.root = tkinter.Tk()
         self.PygameFrame = tkinter.Frame(self.root, width=self.screen_width, height=self.screen_height)
@@ -33,7 +43,7 @@ class Main(variables.Variables):
         self.ms = self.clock.tick(50)
 
         # The Game
-        self.game = in_game.Game(self.screen, self.ms, master=self.root)
+        self.game = in_game.Game(master=self.root)
 
     def run(self):
         """
@@ -47,7 +57,7 @@ class Main(variables.Variables):
                     # self.root.destroy()
                     sys.exit()
                 else:
-                    self.game.get_vars()
+                    # self.game.get_vars()
                     self.game.on_event(event)
 
             self.ms = self.clock.tick(200)

@@ -1,6 +1,7 @@
 import itertools
 import pygame
-from original import variables
+import pickle
+from socket_implementation.client import variables
 
 __author__ = 'Markus Peterson'
 
@@ -19,6 +20,7 @@ class Character(variables.Variables):
         :param pos: Position of the character
         """
         self.pos = pos
+        self.around = []
 
     def collision_detect(self, map):
         """
@@ -96,3 +98,4 @@ class Player(Character):
         self.pos[0] = round(self.real_pos[0])
         self.pos[1] = round(self.real_pos[1])
         self.collision_detect(current_chunk)
+        self.client.send(pickle.dumps(('update player position', self.pos)))

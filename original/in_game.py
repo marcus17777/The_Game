@@ -1,8 +1,7 @@
 import tkinter
 import pygame
-from original import map_generator
 from original import variables
-from original import game_classes
+
 
 __author__ = 'Markus Peterson'
 
@@ -27,7 +26,7 @@ def fps_counter(screen, ms):
 
 
 class Game(variables.Variables, tkinter.Frame):
-    def __init__(self, screen, ms, master=None):
+    def __init__(self, master=None):
         """
             The class that handles game mechanics and all other stuff.
 
@@ -37,9 +36,8 @@ class Game(variables.Variables, tkinter.Frame):
         """
         variables.Variables.__init__(self)
         self.master = master
-        self.World_map = map_generator.Map()
-        self.camera_pos = [0, 0]
-        self.mainplayer = game_classes.Player([self.world_map_width // 2, self.world_map_height // 2])
+        self.map_generator = self.module_map_generator.Map_Generator()
+        self.mainplayer = self.module_game_classes.Player([self.world_map_width // 2, self.world_map_height // 2])
         # self.minimap = Minimap()
 
         # Create frame
@@ -72,15 +70,18 @@ class Game(variables.Variables, tkinter.Frame):
         :param screen: Surface, where all the stuff are blited to.
         :param ms: Parameter that is needed for character movement and fps calculation.
         """
-        self.camera_pos = [(self.screen_width // 2 + self.world_map_block_size // 2) - (
+        variables.Variables.camera_pos = [(self.screen_width // 2 + self.world_map_block_size // 2) - (
         self.mainplayer.pos[0] + 1) * self.world_map_block_size,
-                           (self.screen_height // 2 - (self.mainplayer.pos[1] + 1) * self.world_map_block_size)]
+                                          (self.screen_height // 2 - (
+                                          self.mainplayer.pos[1] + 1) * self.world_map_block_size)]
 
-        self.World_map.blit_all_maps(screen, self.camera_pos)
-        self.World_map.create_new_chunk(self.mainplayer.pos)
+        self.map_generator.blit_all_maps(screen, self.camera_pos)
+        self.map_generator.create_new_chunk(self.mainplayer.pos)
         # fps_counter(screen, ms)
-        self.mainplayer.update(screen, ms, self.World_map.map_chunks[self.World_map.current_map_idx])
+        self.mainplayer.update(screen, ms, self.map_generator.get_current_chunk())
         self.display_collision()
+        self.spell_group.draw(screen)
+        self.spell_group.update(self.camera_pos)
 
     def on_event(self, event):
         """
@@ -102,8 +103,9 @@ class Game(variables.Variables, tkinter.Frame):
                 self.mainplayer.move('right')
 
             elif event.key == pygame.K_p:
-                pygame.image.save(self.World_map.map_chunk_surfaces[self.World_map.current_map_idx],
-                                  ('pics/pic[' + ", ".join(tuple(map(str, self.World_map.current_map_idx)))) + '].jpeg')
+                pygame.image.save(self.map_generator.map_chunk_surfaces[self.map_generator.current_map_idx],
+                                  ('pics/pic[' + ", ".join(
+                                      tuple(map(str, self.map_generator.current_map_idx)))) + '].jpeg')
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
@@ -111,3 +113,9 @@ class Game(variables.Variables, tkinter.Frame):
 
             elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 self.mainplayer.move('stop_x')
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # print(event)
+            if event.button == 1:
+                self.mainplayer.weapon.shoot(event.pos)
+                # pass

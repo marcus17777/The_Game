@@ -1,6 +1,6 @@
 __author__ = 'Markus Peterson'
 
-import socket_implementation, select, tkinter, random
+import socket, select, tkinter, random
 
 
 class Client(tkinter.Frame):
@@ -9,8 +9,9 @@ class Client(tkinter.Frame):
         self.master = master
         self.name = 'Markus'
         self.clientport = random.randrange(8000, 8999)
-        self.connection = socket_implementation.socket(socket_implementation.AF_INET, socket_implementation.SOCK_DGRAM)
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.connection.bind((ip, self.clientport))
+        print(self.connection)
 
         self.serverip = serverip
         self.serverport = serverport
@@ -61,5 +62,5 @@ class Client(tkinter.Frame):
 if __name__ == '__main__':
     root = tkinter.Tk()
     root.title('ChatClient')
-    app = Client('83.187.137.206', 8000, master=root, ip='83.187.137.206')
+    app = Client('172.17.175.170', 8000, master=root, ip=socket.gethostbyname(socket.gethostname()))
     app.run()

@@ -27,7 +27,8 @@ class Character(variables.Variables):
         :param map: The current map where the character is standing on.
         """
         around = []
-        pos_on_map = ((self.pos[0]) % self.world_map_width, (self.pos[1]) % self.world_map_height)
+        pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
+                      self.pos[1] % self.world_map_height + self.world_map_height)
         for dy, dx in itertools.product(range(-1, 1 + 1), repeat=2):
             if dx == dy == 0:
                 around.append("#")
@@ -37,6 +38,10 @@ class Character(variables.Variables):
                 except:
                     pass
         self.around = around
+
+    # Override this in subclasses
+    def shoot(self, mouse_click_pos):
+        pass
 
 
 class Player(Character):
@@ -49,12 +54,14 @@ class Player(Character):
         Character.__init__(self, pos)
         self.color = (255, 0, 0)
         self.size = (self.world_map_block_size, 2 * self.world_map_block_size)
-        self.pos_onscreen = [self.screen_width // 2 - self.size[0] / 2,
-                             self.screen_height // 2 - self.size[1] / 2]
+        self.pos_onscreen = [self.screen_width // 2 - self.size[0] / 2, self.screen_height // 2 - self.size[1] / 2]
         self.move_direction = [0, 0]
-        # self.real_speed = 0.04 # default
-        self.real_speed = 0.04
+        self.real_speed = 0.01
         self.real_pos = self.pos
+
+        self.weapon = self.module_spells.Shotgun(self)
+        self.weapon.ammo = "Simple_Bullet"  # Should be class name of the ammo
+        self.weapon.amount_of_ammo = 1000
 
         self.move_commands = {
             'forward': (1, -1),
@@ -96,3 +103,4 @@ class Player(Character):
         self.pos[0] = round(self.real_pos[0])
         self.pos[1] = round(self.real_pos[1])
         self.collision_detect(current_chunk)
+        # print(self.pos)

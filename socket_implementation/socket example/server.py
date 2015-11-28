@@ -1,15 +1,14 @@
 __author__ = 'Markus Peterson'
-
-import socket_implementation
+import socket
 import select
 import datetime
 import os
 
 
 class Server:
-    def __init__(self, address=socket_implementation.gethostbyname(socket_implementation.gethostname()), port=8000,
+    def __init__(self, address=socket.gethostbyname(socket.gethostname()), port=8000,
                  max_chatters=5):
-        self.listener = socket_implementation.socket(socket_implementation.AF_INET, socket_implementation.SOCK_DGRAM)
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.listener.bind((address, port))
         print(self.listener)
         self.read_list = [self.listener]
