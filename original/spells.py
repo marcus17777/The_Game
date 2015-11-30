@@ -31,7 +31,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.starttick = pygame.time.get_ticks()
 
         self.lifetime = lifetime
-        self.real_speed = 0.5
+        self.real_speed = 1
 
         self.speed_x = self.real_speed * math.cos(angle)
         self.speed_y = self.real_speed * math.sin(angle)
