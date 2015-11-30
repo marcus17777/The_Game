@@ -59,12 +59,16 @@ class Map_Generator(variables.Variables):
         self.create_map_chunk_surface(xy)
 
     def change_block(self, pos, new_id):
+        idx, pos_on_map = self.convert_coords(pos)
+        self.map_chunks[idx][pos_on_map[1]][pos_on_map[0]] = new_id
+        self.create_map_chunk_surface(idx)
+
+    def convert_coords(self, pos):
         map_chunk_id = (pos[0] // self.world_map_width,
                         pos[1] // self.world_map_height)
         pos_on_map = (pos[0] % self.world_map_width,
                       pos[1] % self.world_map_height)
-        print(map_chunk_id, pos_on_map)
-        self.map_chunks[map_chunk_id][pos_on_map[0]][pos_on_map[1]] = new_id
+        return map_chunk_id, pos_on_map
 
     def create_map_chunk_surface(self, xy):
         """
@@ -143,30 +147,3 @@ class Map_Generator(variables.Variables):
                 if abs(direction[0]) + abs(direction[0]) == 2:
                     self.generate_map_chunk((self.new_map_idx[0], self.current_map_idx[1]))
                     self.generate_map_chunk((self.current_map_idx[0], self.new_map_idx[1]))
-
-
-class MapGenerator(object):
-    def __init__(self, position, x, y, z, octaves=1, persistence=0.5, lacunarity=2.0):
-        """
-            Perlin noise map generator class for multiprocessing.
-
-        :param position: Position of the block on the map chunk
-        :param x: x - offset for Perlin noise.
-        :param y: y - offset for Perlin noise.
-        :param z: z - offset for Perlin noise.
-        :param octaves:
-        :param persistence:
-        :param lacunarity:
-        """
-        self.position = position
-        self.x = x
-        self.y = y
-        self.z = z
-        self.octaves = octaves
-        self.persistence = persistence
-        self.lacunarity = lacunarity
-
-    def __call__(self):
-        return (
-        round(noise.snoise3(self.x, self.y, self.x, self.octaves, self.persistence, self.lacunarity) * 127.0 + 128.0),
-        self.position)

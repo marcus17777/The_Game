@@ -66,8 +66,10 @@ class Main(variables.Variables):
                 self.game.map_draw(self.screen, self.ms)
                 pygame.display.flip()
                 self.root.update()
-        except Exception as e:
-            print('Exception: ', e)
+                # except Exception as e:
+                # print('Exception: ', e)
+        finally:
+            print('asd')
 
 
 if __name__ == '__main__':

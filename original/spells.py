@@ -17,6 +17,9 @@ class Cannon:
         self.owner = owner
         self.ammo = None
         self.amount_of_ammo = 0
+        self.delay = 0
+
+        self.starttick = 0
 
     def shoot(self, mouse_click_pos):
         """
@@ -45,9 +48,10 @@ class BlockRemover(Tool):
         Tool.__init__(self, owner)
 
     def work(self, mouse_click_pos):
-        print(self.owner.pos)
-        self.game.map_generator.change_block(
-            tuple(map(lambda x, y: (x - y) // self.world_map_block_size, mouse_click_pos, self.camera_pos)), 0)
+        for dx, dy in itertools.product(range(-1, 2), repeat=2):
+            self.game.map_generator.change_block(
+                ((mouse_click_pos[0] - self.camera_pos[0]) // self.world_map_block_size + dx,
+                 (mouse_click_pos[1] - self.camera_pos[1]) // self.world_map_block_size + dy), 0)
 
 
 
@@ -72,7 +76,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.starttick = pygame.time.get_ticks()
 
         self.lifetime = lifetime
-        self.real_speed = 1
+        self.real_speed = 0.5
         self.explode_size = explode_size
 
         self.speed_x = self.real_speed * math.cos(angle)
@@ -88,14 +92,25 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.pos[1] += self.speed_y
         self.rect.x = self.pos[0] * self.world_map_block_size + camera_pos[0]
         self.rect.y = self.pos[1] * self.world_map_block_size + camera_pos[1]
+        self.collision_detect()
         self.delete_on_time()
+
+    def destroy(self):
+        self.groups()[0].remove(self)
+
+    def collision_detect(self):
+        id, coords_on_map = self.game.map_generator.convert_coords(
+            (round(self.pos[1] + self.speed_y), round(self.pos[0] + self.speed_x)))
+        if self.game.map_generator.map_chunks[id][coords_on_map[1]][coords_on_map[0]] != 0:
+            self.explode()
+            # self.destroy()
 
     def delete_on_time(self):
         """
             Deletes the projectile particle when some time has passed.
         """
         if pygame.time.get_ticks() - self.starttick >= self.lifetime:
-            self.groups()[0].remove(self)
+            self.destroy()
 
     # Override if needed. This just clears all blocks on the map in some radius when projectile is colliding with some block on the map.
     def explode(self):
@@ -104,15 +119,18 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
 
         :param radius: Parameter
         """
-        radius = int((self.explode_size - 1) / 2)
-        try:
-            if radius != 0:
-                for dy, dx in itertools.product(range(-radius, radius), repeat=2):
-                    variables.Variables.module_map_generator.change_block((round(self.pos[0] + self.speed_x + dx),
-                                                                           round(self.pos[1] + self.speed_y + dy),
-                                                                           0))
-        except:
-            pass
+        # radius = int((self.explode_size - 1) / 2)
+        # try:
+        #     if radius != 0:
+        #         for dy, dx in itertools.product(range(-radius, radius), repeat=2):
+        #             self.game.map_generator.change_block((round(self.pos[0] + self.speed_x + dx),
+        #                                                   round(self.pos[1] + self.speed_y + dy),
+        #                                                   0), 0)
+        # except:
+        #     pass
+        print('asd')
+        self.game.map_generator.change_block((int(self.pos[0] + self.speed_x),
+                                              int(self.pos[1] + self.speed_y)), 0)
 
 
 class SingleShotCannon(Cannon, variables.Variables):
@@ -144,11 +162,13 @@ class Shotgun(Cannon, variables.Variables):
         :param owner:
         """
         Cannon.__init__(self, owner)
+        self.delay = 1000
 
     def shoot(self, mouse_click_pos):
-        if self.amount_of_ammo > 0:
+        if self.amount_of_ammo > 0 and pygame.time.get_ticks() - self.starttick > self.delay:
             angle = math.atan2(mouse_click_pos[1] - self.owner.pos_onscreen[1],
                                mouse_click_pos[0] - self.owner.pos_onscreen[0])
+            self.starttick = pygame.time.get_ticks()
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle - math.pi / 15))
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle))
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle + math.pi / 15))
@@ -160,4 +180,4 @@ class Shotgun(Cannon, variables.Variables):
 
 class SimpleBullet(Projectile):
     def __init__(self, pos, mouse_click_pos):
-        Projectile.__init__(self, pos, mouse_click_pos, 500, 1, (255, 255, 255))
+        Projectile.__init__(self, pos, mouse_click_pos, 100, 3, (255, 255, 255))
