@@ -54,6 +54,11 @@ class Client(variables.Variables):
                         except:
                             pass
 
+                        if 'update' in cmd:
+                            if 'map_chunk' in cmd:
+                                # Change map
+                                self
+
 
         except ExitGame:
             print("Game has quit normally.")

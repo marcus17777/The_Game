@@ -1,6 +1,7 @@
 import socket
 import select
 import pickle
+from copy import deepcopy
 from socket_implementation.server import map_generator
 from socket_implementation.server import variables
 
@@ -36,6 +37,7 @@ class Server(variables.Variables):
                 for r in readable:
                     if r is self.listener:
                         msg, addr = r.recvfrom(1024)
+                        raw_msg = deepcopy(msg)
                         msg = pickle.loads(msg)
                         cmd = msg[0]
                         msg = msg[1]
@@ -70,6 +72,11 @@ class Server(variables.Variables):
                                     # """
                                     if key != addr:
                                         self.listener.sendto(pickle.dumps(('update player position', value)), key)  #"""
+
+                            elif 'map_chunk' in cmd:
+                                self.Map_Generator.map_chunks[msg[0]][msg[1][0]][msg[1][1]] = msg[3]
+                                for key in self.players.keys():
+                                    self.listener.sendto(raw_msg, key)
         finally:
             pass
 
