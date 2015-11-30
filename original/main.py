@@ -43,28 +43,31 @@ class Main(variables.Variables):
         self.ms = self.clock.tick(50)
 
         # The Game
-        self.game = in_game.Game(master=self.root)
+        variables.Variables.game = in_game.Game(master=self.root)
 
     def run(self):
         """
             The main game loop. Has event calling inside and draws everything onto screen using the map_draw function from in_game.
             Also updates pygame.display and root tkinter.Frame.
         """
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    # self.root.destroy()
-                    sys.exit()
-                else:
-                    # self.game.get_vars()
-                    self.game.on_event(event)
+        try:
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        # self.root.destroy()
+                        sys.exit()
+                    else:
+                        # self.game.get_vars()
+                        self.game.on_event(event)
 
-            self.ms = self.clock.tick(200)
-            self.screen.fill((80, 80, 80))
-            self.game.map_draw(self.screen, self.ms)
-            pygame.display.flip()
-            self.root.update()
+                self.ms = self.clock.tick(200)
+                self.screen.fill((80, 80, 80))
+                self.game.map_draw(self.screen, self.ms)
+                pygame.display.flip()
+                self.root.update()
+        except Exception as e:
+            print('Exception: ', e)
 
 
 if __name__ == '__main__':

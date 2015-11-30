@@ -20,9 +20,11 @@ class Variables:
     module_game_classes = None
     module_spells = None
 
+    game = None
+
     # SCREEN
-    screen_width = 1600
-    screen_height = 900
+    screen_width = 800
+    screen_height = 600
     camera_pos = []
 
     # MAP_GEN

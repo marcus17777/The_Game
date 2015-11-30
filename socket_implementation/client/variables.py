@@ -23,6 +23,8 @@ class Variables:
                  'world_map_colors',
                  'minimap_colors']
 
+    module_game_map = None
+
     # Variables to make socket server static.
     serveraddr = ('0.0.0.0', 8000)
     clientaddr = ('0.0.0.0', 8000)
@@ -31,6 +33,8 @@ class Variables:
 
     # All other game vars.
     players = {}
+    map_chunks = {}
+    map_chunks_surfaces = {}
 
     # Variables that are asked from the server
     screen_width = None

@@ -19,8 +19,8 @@ class Map_Generator(variables.Variables):
         self.map_directory = 'maps/seed=%s/' % self.world_map_gen_seed
         os.makedirs(self.map_directory, exist_ok=True)
         self.current_map_idx = (0, 0)
-        # self.generate_map_chunk((0, 0))
-        for dx, dy in itertools.product(range(-1, 2), repeat=2): self.generate_map_chunk((dx, dy))
+        self.generate_map_chunk((0, 0))
+        # for dx, dy in itertools.product(range(-1, 2), repeat=2): self.generate_map_chunk((dx, dy))
 
     def generate_map_chunk(self, xy):
         """
@@ -63,6 +63,7 @@ class Map_Generator(variables.Variables):
                         pos[1] // self.world_map_height)
         pos_on_map = (pos[0] % self.world_map_width,
                       pos[1] % self.world_map_height)
+        print(map_chunk_id, pos_on_map)
         self.map_chunks[map_chunk_id][pos_on_map[0]][pos_on_map[1]] = new_id
 
     def create_map_chunk_surface(self, xy):

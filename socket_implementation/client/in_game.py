@@ -1,9 +1,12 @@
 import tkinter
 import pygame
+import operator
 # from original import map_generator
 from socket_implementation.client import variables
 from socket_implementation.client import game_classes
 from socket_implementation.client import game_map
+
+variables.Variables.module_game_map = game_map
 
 __author__ = 'Markus Peterson'
 
@@ -68,7 +71,7 @@ class Game(variables.Variables, tkinter.Frame):
             self.textbox.insert(1.0, "\n")
 
     def draw_all_other_players(self, screen, camera_pos):
-        print(self.players)
+        # print(self.players)
         for pos in self.players.values():
             try:
                 pos = list(map(int, pos))
@@ -90,8 +93,8 @@ class Game(variables.Variables, tkinter.Frame):
             self.mainplayer.pos[0] + 1) * self.world_map_block_size,
                            (self.screen_height // 2 - (self.mainplayer.pos[1] + 1) * self.world_map_block_size)]
 
-        # self.World_map.blit_all_maps(screen, self.camera_pos)
-        # self.World_map.create_new_chunk(self.mainplayer.pos)
+        self.World_map.blit_all_maps(screen, self.camera_pos)
+        self.World_map.create_new_chunk(self.mainplayer.pos)
         # fps_counter(screen, ms)
         self.mainplayer.update(screen, ms, [])  # self.World_map.get_chunk(self.World_map.current_map_idx))
         self.draw_all_other_players(screen, self.camera_pos)
@@ -126,3 +129,10 @@ class Game(variables.Variables, tkinter.Frame):
 
             elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 self.mainplayer.move('stop_x')
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                temp = tuple(
+                    map(lambda x: x // self.world_map_block_size, map(operator.add, event.pos, self.camera_pos)))
+                self.World_map.modify_block((temp[0] // self.world_map_width, temp[1] // self.world_map_height),
+                                            (temp[0] % self.world_map_width, temp[1] % self.world_map_height), 0)

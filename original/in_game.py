@@ -119,3 +119,5 @@ class Game(variables.Variables, tkinter.Frame):
             if event.button == 1:
                 self.mainplayer.weapon.shoot(event.pos)
                 # pass
+            elif event.button == 3:
+                self.mainplayer.tool.work(event.pos)

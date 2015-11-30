@@ -91,7 +91,7 @@ class Player(Character):
         pygame.draw.line(screen, self.color, (self.pos_onscreen[0]+self.size[0], self.pos_onscreen[1]+self.size[1]), (self.pos_onscreen[0]+self.size[0]/2, self.pos_onscreen[1]), 2)
         """
         pygame.draw.rect(screen, (0, 100, 0), (
-            self.pos_onscreen[0], self.pos_onscreen[1], self.world_map_block_size, self.world_map_block_size))
+        self.pos_onscreen[0], self.pos_onscreen[1], self.world_map_block_size, self.world_map_block_size))
         self.real_pos = [self.real_pos[0] + self.move_direction[0] * self.real_speed * ms,
                          self.real_pos[1] + self.move_direction[1] * self.real_speed * ms]
 

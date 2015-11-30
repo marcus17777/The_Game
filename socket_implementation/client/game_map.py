@@ -8,8 +8,8 @@ __author__ = 'Markus Peterson'
 
 class World_Map(variables.Variables):
     def __init__(self):
-        self.map_chunks = {}
-        self.map_chunks_surfaces = {}
+        # self.map_chunks = {}
+        # self.map_chunks_surfaces = {}
         self.current_map_idx = (0, 0)
 
     def get_chunk(self, xy):
@@ -22,16 +22,20 @@ class World_Map(variables.Variables):
             cmd = msg[0]
             msg = msg[1]
             if 'respond map_chunk' in cmd:
-                self.map_chunks[msg[1]] = msg[0]
-                self.map_chunks_surfaces[msg[1]] = self.create_map_chunk_surface(msg[0])
+                variables.Variables.map_chunks[msg[1]] = msg[0]
+                variables.Variables.map_chunks_surfaces[msg[1]] = self.create_map_chunk_surface(msg[0])
                 return msg
 
     def get_chunk_surface(self, xy):
         try:
             return self.map_chunks_surfaces[xy]
         except KeyError:
-            self.map_chunks_surfaces[xy] = self.create_map_chunk_surface(self.get_chunk(xy))
+            variables.Variables.map_chunks_surfaces[xy] = self.create_map_chunk_surface(self.get_chunk(xy))
             return self.map_chunks_surfaces[xy]
+
+    def modify_block(self, chunk_id, map_pos, new_id):
+        print(chunk_id, map_pos)
+        variables.Variables.map_chunks[chunk_id][map_pos[1]][map_pos[0]] = new_id
 
     def create_map_chunk_surface(self, chunk):
         """

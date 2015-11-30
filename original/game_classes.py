@@ -60,8 +60,10 @@ class Player(Character):
         self.real_pos = self.pos
 
         self.weapon = self.module_spells.Shotgun(self)
-        self.weapon.ammo = "Simple_Bullet"  # Should be class name of the ammo
+        self.weapon.ammo = "SimpleBullet"  # Should be class name of the ammo
         self.weapon.amount_of_ammo = 1000
+
+        self.tool = self.module_spells.BlockRemover(self)
 
         self.move_commands = {
             'forward': (1, -1),

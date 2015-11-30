@@ -74,7 +74,7 @@ class Server(variables.Variables):
                                         self.listener.sendto(pickle.dumps(('update player position', value)), key)  #"""
 
                             elif 'map_chunk' in cmd:
-                                self.Map_Generator.map_chunks[msg[0]][msg[1][0]][msg[1][1]] = msg[3]
+                                self.Map_Generator.map_chunks[msg[0]][msg[1][1]][msg[1][0]] = msg[3]
                                 for key in self.players.keys():
                                     self.listener.sendto(raw_msg, key)
         finally:
@@ -82,5 +82,5 @@ class Server(variables.Variables):
 
 
 if __name__ == '__main__':
-    g = Server(serveraddr='192.168.1.176', serverport=8000)
+    g = Server(serveraddr='192.168.1.190', serverport=8000)
     g.run()

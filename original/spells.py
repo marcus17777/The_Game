@@ -1,6 +1,7 @@
 import pygame
 import math
 import itertools
+import operator
 from original import variables
 
 __author__ = 'Markus Peterson'
@@ -26,6 +27,30 @@ class Cannon:
         pass
 
 
+class Tool(variables.Variables):
+    def __init__(self, owner):
+        """
+            Abstract class for tools
+
+        :param owner: Current owner of the tool.
+        """
+        self.owner = owner
+
+    def work(self, mouse_click_pos):
+        pass
+
+
+class BlockRemover(Tool):
+    def __init__(self, owner):
+        Tool.__init__(self, owner)
+
+    def work(self, mouse_click_pos):
+        print(self.owner.pos)
+        self.game.map_generator.change_block(
+            tuple(map(lambda x, y: (x - y) // self.world_map_block_size, mouse_click_pos, self.camera_pos)), 0)
+
+
+
 class Projectile(variables.Variables, pygame.sprite.Sprite):
     def __init__(self, pos, angle, lifetime, explode_size, color=(255, 255, 255)):
         """
@@ -48,6 +73,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
 
         self.lifetime = lifetime
         self.real_speed = 1
+        self.explode_size = explode_size
 
         self.speed_x = self.real_speed * math.cos(angle)
         self.speed_y = self.real_speed * math.sin(angle)
@@ -72,13 +98,13 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
             self.groups()[0].remove(self)
 
     # Override if needed. This just clears all blocks on the map in some radius when projectile is colliding with some block on the map.
-    def explode(self, radius):
+    def explode(self):
         """
             When the projectile particle collides with the map it deletes some blocks in some radius.
 
         :param radius: Parameter
         """
-        radius = int((radius - 1) / 2)
+        radius = int((self.explode_size - 1) / 2)
         try:
             if radius != 0:
                 for dy, dx in itertools.product(range(-radius, radius), repeat=2):
@@ -89,7 +115,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
             pass
 
 
-class Single_Shot_Cannon(Cannon, variables.Variables):
+class SingleShotCannon(Cannon, variables.Variables):
     def __init__(self, owner):
         """
             Weapon that shots single bullet at a time.
@@ -132,6 +158,6 @@ class Shotgun(Cannon, variables.Variables):
             # self.amount_of_ammo -= 3
 
 
-class Simple_Bullet(Projectile):
+class SimpleBullet(Projectile):
     def __init__(self, pos, mouse_click_pos):
         Projectile.__init__(self, pos, mouse_click_pos, 500, 1, (255, 255, 255))

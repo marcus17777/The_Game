@@ -102,6 +102,9 @@ class Main(variables.Variables):
                         if 'update' in cmd:
                             if 'player position' in cmd:
                                 variables.Variables.players[addr] = msg
+                            elif 'map_chunk' in cmd:
+                                # Change map
+                                variables.Variables.module_game_map.modify_block(msg[0], msg[1], msg[2])
 
                 # Game
                 for event in pygame.event.get():
@@ -118,6 +121,8 @@ class Main(variables.Variables):
                 self.root.update()
         except ExitGame:
             print("Game has quit normally.")
+        except Exception as e:
+            print('Exception: ', e)
         finally:
             self.client.send(pickle.dumps(('disconnect', '')))
             pygame.quit()
@@ -125,5 +130,5 @@ class Main(variables.Variables):
             sys.exit()
 
 if __name__ == '__main__':
-    game = Main(serveraddr='192.168.1.176', serverport=8000, clientaddr='192.168.1.176')
+    game = Main(serveraddr='192.168.1.190', serverport=8000, clientaddr='192.168.1.190')
     game.run()
