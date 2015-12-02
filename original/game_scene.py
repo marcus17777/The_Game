@@ -14,39 +14,29 @@ __author__ = 'Markus Peterson'
 # TODO Make some menu somehere in Tk
 
 class Main(variables.Variables):
-    def __init__(self):
+    def __init__(self, screen, font, clock, ms, master):
         """
             Main class that hooks everything up and runs the game.
         """
         # setting things up
+        # variables
+        self.screen = screen
+        self.font = font
+        self.ms = ms
+        self.clock = clock
+        self.master = master
+
         # modules to be accessible from everywhere
         variables.Variables.module_ingame = in_game
         variables.Variables.module_map_generator = map_generator
         variables.Variables.module_game_classes = game_classes
         variables.Variables.module_spells = spells
 
-        # tkinter frame
-        self.root = tkinter.Tk()
-        self.PygameFrame = tkinter.Frame(self.root, width=self.screen_width, height=self.screen_height)
-        self.PygameFrame.pack(side='left')
-        os.environ['SDL_WINDOWID'] = str(self.PygameFrame.winfo_id())
-        os.environ['SDL_VIDEODRIVER'] = 'windib'
-
-        # pygame
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        pygame.display.init()
-        pygame.font.init()
-        pygame.display.set_caption('The Game')
-        self.PygameFrame.focus_set()
-        self.screen.fill((80, 80, 80))
-        self.font = pygame.font.Font(None, 18)
-        self.clock = pygame.time.Clock()
-        self.ms = self.clock.tick(50)
-
         # The Game
-        variables.Variables.game = in_game.Game(master=self.root)
+        variables.Variables.game = in_game.Game(master=self.master)
 
     def run(self):
+        print('in game')
         """
             The main game loop. Has event calling inside and draws everything onto screen using the map_draw function from in_game.
             Also updates pygame.display and root tkinter.Frame.
@@ -66,7 +56,7 @@ class Main(variables.Variables):
                 self.screen.fill((80, 80, 80))
                 self.game.map_draw(self.screen, self.font, self.ms)
                 pygame.display.flip()
-                self.root.update()
+                self.master.update()
                 # except Exception as e:
                 # print('Exception: ', e)
         finally:
