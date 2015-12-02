@@ -9,7 +9,7 @@ __author__ = 'Markus Peterson'
 # TODO Make FPS counter to work
 
 # """
-def fps_counter(screen, ms):
+def fps_counter(screen, font, ms):
     """
         Just a fps_counter to debug how good the game is running.
         Not working atm.
@@ -18,7 +18,7 @@ def fps_counter(screen, ms):
     :param ms: Needed for fps calculation.
     """
     fps_text = 'FPS: ' + str(1 // (ms / 1000))
-    fps_surface = pygame.font.Font.render(fps_text, False, (255, 255, 255))
+    fps_surface = font.render(fps_text, False, (255, 255, 255))
     screen.blit(fps_surface, (0, 0))
 
 
@@ -63,7 +63,7 @@ class Game(variables.Variables, tkinter.Frame):
             self.textbox.insert(1.0, self.mainplayer.around[3 * i:3 * (i + 1)])
             self.textbox.insert(1.0, "\n")
 
-    def map_draw(self, screen, ms):
+    def map_draw(self, screen, font, ms):
         """
             Function that draws the game onto the screen surface.
 
@@ -77,7 +77,7 @@ class Game(variables.Variables, tkinter.Frame):
 
         self.map_generator.blit_all_maps(screen, self.camera_pos)
         self.map_generator.create_new_chunk(self.mainplayer.pos)
-        # fps_counter(screen, ms)
+        fps_counter(screen, font, ms)
         self.mainplayer.update(screen, ms, self.map_generator.get_current_chunk())
         self.display_collision()
         self.spell_group.draw(screen)

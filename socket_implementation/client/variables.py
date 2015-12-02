@@ -5,7 +5,7 @@ class Variables:
     """
         Class for client to hold static variables accessable to all childclasses.
         Some variables are assigned to None. Their values are asked from the server and
-        are assigned to these variables in the main.py.
+        are assigned to these variables in the game_scene.py.
     """
     variables = ['screen_width',
                  'screen_height',

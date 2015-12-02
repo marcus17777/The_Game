@@ -76,7 +76,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.starttick = pygame.time.get_ticks()
 
         self.lifetime = lifetime
-        self.real_speed = 0.5
+        self.real_speed = 0.1
         self.explode_size = explode_size
 
         self.speed_x = self.real_speed * math.cos(angle)
@@ -92,7 +92,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.pos[1] += self.speed_y
         self.rect.x = self.pos[0] * self.world_map_block_size + camera_pos[0]
         self.rect.y = self.pos[1] * self.world_map_block_size + camera_pos[1]
-        self.collision_detect()
+        # self.collision_detect()
         self.delete_on_time()
 
     def destroy(self):
@@ -103,7 +103,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
             (round(self.pos[1] + self.speed_y), round(self.pos[0] + self.speed_x)))
         if self.game.map_generator.map_chunks[id][coords_on_map[1]][coords_on_map[0]] != 0:
             self.explode()
-            # self.destroy()
+            self.destroy()
 
     def delete_on_time(self):
         """
@@ -162,22 +162,42 @@ class Shotgun(Cannon, variables.Variables):
         :param owner:
         """
         Cannon.__init__(self, owner)
-        self.delay = 1000
+        self.cartridge_image = pygame.transform.scale(pygame.image.load('pics/shotgun_alpha.jpg'), (20, 10))
+        self.image_rect = self.cartridge_image.get_rect()
+
+        self.shot_delay = 500
+        self.reload_delay = 600
+        self.max_magazine = 7
+        self.current_magazine = self.max_magazine
+        self.reloading_time_per_bullet = 1000
+
+    def draw(self, screen):
+        for i in range(self.current_magazine):
+            screen.blit(self.cartridge_image, (self.screen_width - (self.max_magazine - i) * (self.image_rect[2] + 20),
+                                               self.screen_height - 20))
 
     def shoot(self, mouse_click_pos):
-        if self.amount_of_ammo > 0 and pygame.time.get_ticks() - self.starttick > self.delay:
+        if self.current_magazine > 0 and pygame.time.get_ticks() - self.starttick > self.shot_delay:
             angle = math.atan2(mouse_click_pos[1] - self.owner.pos_onscreen[1],
                                mouse_click_pos[0] - self.owner.pos_onscreen[0])
             self.starttick = pygame.time.get_ticks()
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle - math.pi / 15))
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle))
             eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle + math.pi / 15))
+            self.current_magazine -= 1
 
             # for i in range(0, 101):
             # eval(self.ammo + "({0}, {1})".format(self.owner.pos, i * 2 * math.pi/100))
             # self.amount_of_ammo -= 3
 
+    # def update(self):
+
+
+    def reload(self):
+        start = pygame.time.get_ticks()
+
+
 
 class SimpleBullet(Projectile):
     def __init__(self, pos, mouse_click_pos):
-        Projectile.__init__(self, pos, mouse_click_pos, 100, 3, (255, 255, 255))
+        Projectile.__init__(self, pos, mouse_click_pos, 1000, 3, (255, 255, 255))

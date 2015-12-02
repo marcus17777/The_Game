@@ -123,27 +123,27 @@ class Map_Generator(variables.Variables):
         direction = [0, 0]
 
         # Checks x axis
-        if (player_pos[0] % self.world_map_width) > (self.world_map_width - self.world_map_gen_threshold_x):
+        if player_pos[0] > (self.world_map_width - self.world_map_gen_threshold_x):
             direction[0] = 1
-        elif (player_pos[0] % self.world_map_width) < self.world_map_gen_threshold_x:
+        elif player_pos[0] < self.world_map_gen_threshold_x:
             direction[0] = -1
 
         # Checks y axis
-        if (player_pos[1] % self.world_map_height) > (self.world_map_height - self.world_map_gen_threshold_y):
+        if player_pos[1] > (self.world_map_height - self.world_map_gen_threshold_y):
             direction[1] = 1
-        elif (player_pos[1] % self.world_map_height) < self.world_map_gen_threshold_y:
+        elif player_pos[1] < self.world_map_gen_threshold_y:
             direction[1] = -1
         return direction
 
     def create_new_chunk(self, player_pos):
-        direction = self.get_map_gen_direction(player_pos)
-        self.current_map_idx = ((player_pos[0] // self.world_map_width), (player_pos[1] // self.world_map_height))
-        self.new_map_idx = tuple(map(operator.add, self.current_map_idx, direction))
+        self.current_map_idx, player_pos_on_map = self.convert_coords(player_pos)
+        direction = self.get_map_gen_direction(player_pos_on_map)
+        new_map_idx = tuple(map(operator.add, self.current_map_idx, direction))
 
         if direction != [0, 0] or self.current_map_idx not in self.map_chunks:
-            if self.new_map_idx not in self.map_chunks:
-                self.generate_map_chunk(self.new_map_idx)
+            if new_map_idx not in self.map_chunks:
+                self.generate_map_chunk(new_map_idx)
 
                 if abs(direction[0]) + abs(direction[0]) == 2:
-                    self.generate_map_chunk((self.new_map_idx[0], self.current_map_idx[1]))
-                    self.generate_map_chunk((self.current_map_idx[0], self.new_map_idx[1]))
+                    self.generate_map_chunk((new_map_idx[0], self.current_map_idx[1]))
+                    self.generate_map_chunk((self.current_map_idx[0], new_map_idx[1]))

@@ -39,6 +39,7 @@ class Main(variables.Variables):
         pygame.display.set_caption('The Game')
         self.PygameFrame.focus_set()
         self.screen.fill((80, 80, 80))
+        self.font = pygame.font.Font(None, 18)
         self.clock = pygame.time.Clock()
         self.ms = self.clock.tick(50)
 
@@ -63,7 +64,7 @@ class Main(variables.Variables):
 
                 self.ms = self.clock.tick(200)
                 self.screen.fill((80, 80, 80))
-                self.game.map_draw(self.screen, self.ms)
+                self.game.map_draw(self.screen, self.font, self.ms)
                 pygame.display.flip()
                 self.root.update()
                 # except Exception as e:

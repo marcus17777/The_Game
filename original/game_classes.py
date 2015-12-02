@@ -19,6 +19,7 @@ class Character(variables.Variables):
         :param pos: Position of the character
         """
         self.pos = pos
+        self.move_direction = [0, 0]
 
     def collision_detect(self, map):
         """
@@ -29,19 +30,20 @@ class Character(variables.Variables):
         around = []
         pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
                       self.pos[1] % self.world_map_height + self.world_map_height)
-        for dy, dx in itertools.product(range(-1, 1 + 1), repeat=2):
-            if dx == dy == 0:
-                around.append("#")
-            else:
-                try:
-                    around.append(map[pos_on_map[1] + dy][pos_on_map[0] + dx])
-                except:
-                    pass
+        for dy in range(-1, 2):
+            around.append([])
+            for dx in range(-1, 2):
+                if dx == dy == 0:
+                    around[-1].append("#")
+                else:
+                    try:
+                        around[-1].append(map[pos_on_map[1] + dy][pos_on_map[0] + dx])
+                    except:
+                        pass
         self.around = around
 
-    # Override this in subclasses
-    def shoot(self, mouse_click_pos):
-        pass
+        if self.around[self.move_direction[1] + 1][self.move_direction[0] + 1] != 0:
+            self.move_direction = [0, 0]
 
 
 class Player(Character):
@@ -55,8 +57,7 @@ class Player(Character):
         self.color = (255, 0, 0)
         self.size = (self.world_map_block_size, 2 * self.world_map_block_size)
         self.pos_onscreen = [self.screen_width // 2 - self.size[0] / 2, self.screen_height // 2 - self.size[1] / 2]
-        self.move_direction = [0, 0]
-        self.real_speed = 0.01
+        self.real_speed = 0.04
         self.real_pos = self.pos
 
         self.weapon = self.module_spells.Shotgun(self)
@@ -99,10 +100,12 @@ class Player(Character):
         """
         pygame.draw.rect(screen, (0, 100, 0), (
             self.pos_onscreen[0], self.pos_onscreen[1], self.world_map_block_size, self.world_map_block_size))
+        if self.weapon != None: self.weapon.draw(screen)
+        self.collision_detect(current_chunk)
         self.real_pos = [self.real_pos[0] + self.move_direction[0] * self.real_speed * ms,
                          self.real_pos[1] + self.move_direction[1] * self.real_speed * ms]
 
         self.pos[0] = round(self.real_pos[0])
         self.pos[1] = round(self.real_pos[1])
-        self.collision_detect(current_chunk)
+
         # print(self.pos)
