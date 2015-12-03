@@ -30,13 +30,13 @@ class Main(variables.Variables):
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        raise variables.Scene_switcher('menu')
+                        raise variables.Scene_switcher('game')
 
             if fade >= 255 and fadeIn:
                 fadeIn = False
                 self.fade_rate = -self.fade_rate
             elif fade <= 0 and not fadeIn:
-                raise variables.Scene_switcher('menu')
+                raise variables.Scene_switcher('game')
             else:
                 fade += self.fade_rate
                 self.image.set_alpha(fade)

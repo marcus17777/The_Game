@@ -60,8 +60,11 @@ class Map_Generator(variables.Variables):
 
     def change_block(self, pos, new_id):
         idx, pos_on_map = self.convert_coords(pos)
-        self.map_chunks[idx][pos_on_map[1]][pos_on_map[0]] = new_id
-        self.create_map_chunk_surface(idx)
+        try:
+            self.map_chunks[idx][pos_on_map[1]][pos_on_map[0]] = new_id
+            self.create_map_chunk_surface(idx)
+        except:
+            pass
 
     def convert_coords(self, pos):
         map_chunk_id = (pos[0] // self.world_map_width,
