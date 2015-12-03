@@ -2,6 +2,7 @@ import tkinter
 import pygame
 import os
 from original import intro_scene
+from original import menu_scene
 from original import game_scene
 from original import variables
 
@@ -30,7 +31,7 @@ class Main(variables.Variables):
 
         self.scenes = {
             'intro': intro_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
-            'menu': '',
+            'menu': menu_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'game': game_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'outro': '',
         }
