@@ -5,45 +5,44 @@ from original import variables
 __author__ = 'Markus Peterson'
 
 
-class Menu(variables.Variables):
-    def __init__(self, childs):
+class MenuNode(variables.Variables):
+    def __init__(self, font=None, text=None, childs=None, command=None, color1=(255, 255, 255), color2=(255, 0, 0)):
+        self.text = text
         self.childs = childs
+        self.font_color = color1
+        self.chosen_font_color = color2
+        self.command = command
+
+        self.images = {
+            1: font.render(text, False, self.chosen_font_color),  # Represents chosen node
+            0: font.render(text, False, self.font_color)  # Represents normal node
+        }
+        self.current_state = 0
+        self.image = self.images[self.current_state]
+
+    def __call__(self, item):
+        option = self.childs[item]
+        if option.childs is None:
+            option.command()
+        else:
+            return self, option
 
     def __getitem__(self, item):
         return self.childs[item]
 
     def draw_childs(self, surface):
         startpos = (self.screen_width // 2, (self.screen_height - len(self.childs) * 30) // 2)
-
         for i in range(len(self.childs)):
-            surface.blit(self.childs[i], (startpos[0], startpos[1] + i * 30))
+            surface.blit(self.childs[i].image, (startpos[0], startpos[1] + i * 30))
 
-
-class MenuNode(Menu):
-    def __init__(self, font, text, childs=None, command=None, color1=(255, 255, 255), color2=(255, 0, 0)):
-        Menu.__init__(self, childs)
-        self.text = text
-        self.font_color = color1
-        self.chosen_font_color = color2
-        self.command = command
-        # self.pos = pos
-
-        self.images = {
-            'chosen': font.render(text, False, self.chosen_font_color),
-            'normal': font.render(text, False, self.font_color)
-        }
-        self.current_state = 'normal'
-        self.image = self.images[self.current_state]
-
-    def __call__(self):
-        self.command()
-
-    def flip(self):
-        if self.current_state == 'normal':
-            self.current_state = 'chosen'
-        elif self.current_state == 'chosen':
-            self.current_state = 'normal'
-        self.image = self.images[self.current_state]
+    def update_childs(self, current_option):
+        for i in range(len(self.childs)):
+            temp = self.childs[i]
+            if i == current_option:
+                temp.current_state = 1
+            else:
+                temp.current_state = 0
+            temp.image = temp.images[temp.current_state]
 
 
 class Main(variables.Variables):
@@ -54,38 +53,63 @@ class Main(variables.Variables):
         self.clock = clock
         self.master = master
 
-        self.menu = Menu([
+        self.menu = MenuNode(self.font, '', childs=[
             MenuNode(self.font, 'Play game', command=lambda: self.change_scene('game')),
             MenuNode(self.font, 'Intro', command=lambda: self.change_scene('intro')),
-            MenuNode(self.font, 'Exit', command=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)))
+            MenuNode(self.font, 'Test', childs=[
+                MenuNode(self.font, 'A'),
+                MenuNode(self.font, 'B'),
+                MenuNode(self.font, 'C')
+            ]),
+            MenuNode(self.font, 'Exit', command=lambda: self.exit_game())
         ])
-        self.current_choice = 0
-        self.menu[self.current_choice].flip()
+        self.current_menu = self.menu
+        self.current_option = 0
+        self.last_nodes = []
 
     def change_scene(self, _str):
         raise variables.Scene_switcher(_str)
+
+    def exit_game(self):
+        pygame.quit()
+        sys.exit()
+
+    def move_between_options(self, direction):
+        self.current_option = max(0, min(self.current_option + direction, len(self.current_menu.childs) - 1))
+
+    def select_option(self):
+        last_node, self.current_menu = self.current_menu(self.current_option)
+        self.last_nodes.append(last_node)
+        self.current_option = 0
+
+    def escape(self):
+        if self.last_nodes != []:
+            self.current_menu = self.last_nodes[-1]
+            self.last_nodes.pop()
+            self.current_option = 0
+        else:
+            self.exit_game()
+
 
     def run(self):
         print('in menu')
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    self.exit_game()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        self.menu[self.current_choice].flip()
-                        self.current_choice = max([0, min(self.current_choice - 1, len(self.menu.childs) - 1)])
-                        self.menu[self.current_choice].flip()
+                        self.move_between_options(-1)
                     elif event.key == pygame.K_DOWN:
-                        self.menu[self.current_choice].flip()
-                        self.current_choice = max(0, min(self.current_choice + 1, len(self.menu.childs) - 1))
-                        self.menu[self.current_choice].flip()
+                        self.move_between_options(+1)
                     elif event.key == pygame.K_RETURN:
-                        self.menu[self.current_choice].command()
+                        self.select_option()
+                    elif event.key == pygame.K_ESCAPE:
+                        self.escape()
 
             self.ms = self.clock.tick(200)
             self.screen.fill((0, 0, 0))
-            self.menu.draw_childs(self.screen)
+            self.current_menu.update_childs(self.current_option)
+            self.current_menu.draw_childs(self.screen)
             pygame.display.flip()
             self.master.update()

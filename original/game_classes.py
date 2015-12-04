@@ -20,6 +20,7 @@ class Character(variables.Variables):
         """
         self.pos = pos
         self.move_direction = [0, 0]
+        self.keyboard_direction = [0, 0]
 
     def collision_detect(self, map):
         """
@@ -30,6 +31,8 @@ class Character(variables.Variables):
         around = []
         pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
                       self.pos[1] % self.world_map_height + self.world_map_height)
+        self.around = around
+        """
         for dy in range(-1, 2):
             around.append([])
             for dx in range(-1, 2):
@@ -42,8 +45,14 @@ class Character(variables.Variables):
                         pass
         self.around = around
 
-        if self.around[self.move_direction[1] + 1][self.move_direction[0] + 1] != 0:
+        if self.around[self.keyboard_direction[1] + 1][self.keyboard_direction[0] + 1] != 0:
             self.move_direction = [0, 0]
+        else:
+            self.move_direction = self.keyboard_direction[:]"""
+
+        self.move_direction = [
+            (1 - map[pos_on_map[1]][pos_on_map[0] + self.keyboard_direction[0]]) * self.keyboard_direction[0],
+            (1 - map[pos_on_map[1] + self.keyboard_direction[1]][pos_on_map[0]]) * self.keyboard_direction[1]]
 
 
 class Player(Character):
@@ -82,7 +91,7 @@ class Player(Character):
         :param direction: The direction where player wants to move.
         """
         modifier = self.move_commands[direction]
-        self.move_direction[modifier[0]] = modifier[1]
+        self.keyboard_direction[modifier[0]] = modifier[1]
 
     def update(self, screen, ms, current_chunk):
         """

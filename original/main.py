@@ -35,7 +35,6 @@ class Main(variables.Variables):
             'game': game_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'outro': '',
         }
-
         self.current_scene = 'intro'
 
     def run(self):
