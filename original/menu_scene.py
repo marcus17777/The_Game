@@ -14,31 +14,32 @@ class MenuNode(variables.Variables):
         self.command = command
 
         self.images = {
-            1: font.render(text, False, self.chosen_font_color),  # Represents chosen node
-            0: font.render(text, False, self.font_color)  # Represents normal node
+            1: font.render(text, True, self.chosen_font_color),  # Represents chosen node
+            0: font.render(text, True, self.font_color)  # Represents normal node
         }
         self.current_state = 0
         self.image = self.images[self.current_state]
+        self.current_option = 0
 
-    def __call__(self, item):
-        option = self.childs[item]
+    def move_between_options(self, direction):
+        self.current_option = max(0, min(self.current_option + direction, len(self.childs) - 1))
+
+    def __call__(self):
+        option = self.childs[self.current_option]
         if option.childs is None:
             option.command()
         else:
             return self, option
-
-    def __getitem__(self, item):
-        return self.childs[item]
 
     def draw_childs(self, surface):
         startpos = (self.screen_width // 2, (self.screen_height - len(self.childs) * 30) // 2)
         for i in range(len(self.childs)):
             surface.blit(self.childs[i].image, (startpos[0], startpos[1] + i * 30))
 
-    def update_childs(self, current_option):
+    def update_childs(self):
         for i in range(len(self.childs)):
             temp = self.childs[i]
-            if i == current_option:
+            if i == self.current_option:
                 temp.current_state = 1
             else:
                 temp.current_state = 0
@@ -56,37 +57,33 @@ class Main(variables.Variables):
         self.menu = MenuNode(self.font, '', childs=[
             MenuNode(self.font, 'Play game', command=lambda: self.change_scene('game')),
             MenuNode(self.font, 'Intro', command=lambda: self.change_scene('intro')),
-            MenuNode(self.font, 'Test', childs=[
+            MenuNode(self.font, 'Options', childs=[
                 MenuNode(self.font, 'A'),
                 MenuNode(self.font, 'B'),
                 MenuNode(self.font, 'C')
             ]),
+            MenuNode(self.font, 'Credits', command=lambda: self.change_scene('credits')),
             MenuNode(self.font, 'Exit', command=lambda: self.exit_game())
         ])
         self.current_menu = self.menu
-        self.current_option = 0
         self.last_nodes = []
 
     def change_scene(self, _str):
-        raise variables.Scene_switcher(_str)
+        raise variables.SceneSwitcher(_str)
 
     def exit_game(self):
         pygame.quit()
         sys.exit()
 
-    def move_between_options(self, direction):
-        self.current_option = max(0, min(self.current_option + direction, len(self.current_menu.childs) - 1))
-
     def select_option(self):
-        last_node, self.current_menu = self.current_menu(self.current_option)
+        last_node, self.current_menu = self.current_menu()
         self.last_nodes.append(last_node)
-        self.current_option = 0
 
     def escape(self):
         if self.last_nodes != []:
+            self.current_menu.current_option = 0
             self.current_menu = self.last_nodes[-1]
             self.last_nodes.pop()
-            self.current_option = 0
         else:
             self.exit_game()
 
@@ -99,9 +96,9 @@ class Main(variables.Variables):
                     self.exit_game()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        self.move_between_options(-1)
+                        self.current_menu.move_between_options(-1)
                     elif event.key == pygame.K_DOWN:
-                        self.move_between_options(+1)
+                        self.current_menu.move_between_options(+1)
                     elif event.key == pygame.K_RETURN:
                         self.select_option()
                     elif event.key == pygame.K_ESCAPE:
@@ -109,7 +106,7 @@ class Main(variables.Variables):
 
             self.ms = self.clock.tick(200)
             self.screen.fill((0, 0, 0))
-            self.current_menu.update_childs(self.current_option)
+            self.current_menu.update_childs()
             self.current_menu.draw_childs(self.screen)
             pygame.display.flip()
             self.master.update()

@@ -150,3 +150,17 @@ class Map_Generator(variables.Variables):
                 if abs(direction[0]) + abs(direction[0]) == 2:
                     self.generate_map_chunk((new_map_idx[0], self.current_map_idx[1]))
                     self.generate_map_chunk((self.current_map_idx[0], new_map_idx[1]))
+
+
+class Chunk:
+    def __init__(self, index):
+        self.blocks = {}
+        pass
+
+    def __getitem__(self, item):
+        return
+
+
+class Block:
+    def __init__(self, index):
+        pass

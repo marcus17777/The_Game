@@ -30,12 +30,14 @@ class Main(variables.Variables):
                     if event.key == pygame.K_ESCAPE:
                         self.movie.rewind()
                         self.movie.stop()
-                        raise variables.Scene_switcher('menu')
+                        raise variables.SceneSwitcher('menu')
 
             self.ms = self.clock.tick(200)
             pygame.display.flip()
             self.master.update()
-        raise variables.Scene_switcher('menu')
+        self.movie.rewind()
+        self.movie.stop()
+        raise variables.SceneSwitcher('menu')
 
         """
         fade = 0

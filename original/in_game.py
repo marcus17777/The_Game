@@ -34,7 +34,7 @@ class Game(variables.Variables, tkinter.Frame):
         :param ms: Parameter that is needed for character movement and fps calculation.
         :param master: The parent of the current tkinter.Frame.
         """
-        variables.Variables.__init__(self)
+        tkinter.Frame.__init__(master)
         self.master = master
         self.map_generator = self.module_map_generator.Map_Generator()
         self.mainplayer = self.module_game_classes.Player([self.world_map_width // 2, self.world_map_height // 2])
@@ -43,8 +43,6 @@ class Game(variables.Variables, tkinter.Frame):
         # Create frame
         self.frame = tkinter.Frame(master=self.master)
         self.frame.pack(side='right')
-        self.textbox = tkinter.Text(master=self.frame, width=16, height=4)
-        self.textbox.pack()
 
     def get_vars(self):
         """
@@ -53,15 +51,6 @@ class Game(variables.Variables, tkinter.Frame):
         self.mouse_pos = pygame.mouse.get_pos()
         self.mouse_index = [[(self.mouse_pos[0] - self.camera_pos[0]) // self.world_map_block_size,
                              (self.mouse_pos[1] - self.camera_pos[1]) // self.world_map_block_size]]
-
-    def display_collision(self):
-        """
-            For displaying collision detection for debugging.
-        """
-        self.textbox.delete(1.0, 'end')
-        for i in range(2, -1, -1):
-            self.textbox.insert(1.0, self.mainplayer.around[3 * i:3 * (i + 1)])
-            self.textbox.insert(1.0, "\n")
 
     def map_draw(self, screen, font, ms):
         """
@@ -79,11 +68,10 @@ class Game(variables.Variables, tkinter.Frame):
         self.map_generator.create_new_chunk(self.mainplayer.pos)
         fps_counter(screen, font, ms)
         self.mainplayer.update(screen, ms, self.map_generator.get_current_chunk())
-        self.display_collision()
         self.spell_group.draw(screen)
-        self.spell_group.update(self.camera_pos)
+        self.spell_group.update(self.camera_pos, ms)
 
-    def on_event(self, event):
+    def on_event(self, event, screen):
         """
             Just a function to get all events in a nice way and to react on them.
 
@@ -102,10 +90,18 @@ class Game(variables.Variables, tkinter.Frame):
             elif event.key == pygame.K_RIGHT:
                 self.mainplayer.move('right')
 
+            elif event.key == pygame.K_i:
+                self.mainplayer.inventory.display(screen)
+
+            elif event.key == pygame.K_r:
+                self.mainplayer.weapon.reload()
+
             elif event.key == pygame.K_p:
                 pygame.image.save(self.map_generator.map_chunk_surfaces[self.map_generator.current_map_idx],
                                   ('pics/pic[' + ", ".join(
                                       tuple(map(str, self.map_generator.current_map_idx)))) + '].jpeg')
+            elif event.key == pygame.K_ESCAPE:
+                raise variables.SceneSwitcher('menu')
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN:

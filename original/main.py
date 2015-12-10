@@ -23,9 +23,10 @@ class Main(variables.Variables):
         pygame.display.init()
         pygame.font.init()
         pygame.display.set_caption('The Game')
+        self.root.protocol('WM_DELETE_WINDOW', lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)))
         self.PygameFrame.focus_set()
         self.screen.fill((80, 80, 80))
-        self.font = pygame.font.Font(None, 18)
+        self.font = pygame.font.Font(None, 36)
         self.clock = pygame.time.Clock()
         self.ms = self.clock.tick(50)
 
@@ -33,15 +34,19 @@ class Main(variables.Variables):
             'intro': intro_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'menu': menu_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'game': game_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
-            'outro': '',
+            'credits': '',
         }
-        self.current_scene = 'intro'
+        self.current_scene = 'menu'
+        self.fade_rate = 1
+        self.fade_surface = pygame.Surface((self.screen_width, self.screen_height))
+        self.fade_surface.fill((0, 0, 0))
+        self.fade_surface.convert()
 
     def run(self):
         while True:
             try:
                 self.scenes[self.current_scene].run()
-            except variables.Scene_switcher as sw:
+            except variables.SceneSwitcher as sw:
                 self.current_scene = sw.value
 
 

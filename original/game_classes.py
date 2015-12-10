@@ -1,5 +1,6 @@
 import itertools
 import pygame
+import random
 from original import variables
 
 __author__ = 'Markus Peterson'
@@ -18,45 +19,39 @@ class Character(variables.Variables):
 
         :param pos: Position of the character
         """
+        if pos == None: self.spawn_randomly()
         self.pos = pos
         self.move_direction = [0, 0]
-        self.keyboard_direction = [0, 0]
+        self.desired_direction = [0, 0]
+
+    def spawn_randomly(self):
+        # map_chunk = (int(random.random()*random.randint(0, 100)), int(random.random()*random.randint(0, 100)))
+        map_chunk = (0, 0)
+        while True:
+            temp = [random.randint(0, self.screen_width // self.world_map_block_size),
+                    random.randint(0, self.screen_height // self.world_map_block_size)]
+            if self.map_generator.map_chunks[map_chunk][temp[1]][temp[0]] == 0:
+                self.pos = temp
+                break
 
     def collision_detect(self, map):
         """
             Collison detection for every character. Allows to move only on certain block on the map.
             Currently in development.
-        :param map: The current map where the character is standing on.
+        :param map: The current map (9 chunks - 3x3) where the character is standing on.
         """
-        around = []
         pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
                       self.pos[1] % self.world_map_height + self.world_map_height)
-        self.around = around
-        """
-        for dy in range(-1, 2):
-            around.append([])
-            for dx in range(-1, 2):
-                if dx == dy == 0:
-                    around[-1].append("#")
-                else:
-                    try:
-                        around[-1].append(map[pos_on_map[1] + dy][pos_on_map[0] + dx])
-                    except:
-                        pass
-        self.around = around
-
-        if self.around[self.keyboard_direction[1] + 1][self.keyboard_direction[0] + 1] != 0:
-            self.move_direction = [0, 0]
-        else:
-            self.move_direction = self.keyboard_direction[:]"""
 
         self.move_direction = [
-            (1 - map[pos_on_map[1]][pos_on_map[0] + self.keyboard_direction[0]]) * self.keyboard_direction[0],
-            (1 - map[pos_on_map[1] + self.keyboard_direction[1]][pos_on_map[0]]) * self.keyboard_direction[1]]
+            (1 - bool(map[pos_on_map[1]][pos_on_map[0] + self.desired_direction[0]])) * self.desired_direction[0],
+            (1 - bool(map[pos_on_map[1] + self.desired_direction[1]][pos_on_map[0]])) * self.desired_direction[1]]
+        if bool(map[pos_on_map[1] + self.move_direction[1]][pos_on_map[0] + self.move_direction[0]]) == True:
+            self.move_direction = [0, 0]
 
 
 class Player(Character):
-    def __init__(self, pos):
+    def __init__(self, pos=None):
         """
             The sublcass of Chaeracter. This is the main player that the user can move and control.
 
@@ -73,7 +68,9 @@ class Player(Character):
         self.weapon.ammo = "SimpleBullet"  # Should be class name of the ammo
         self.weapon.amount_of_ammo = 1000
 
-        self.tool = self.module_spells.BlockRemover(self)
+        self.tool = self.module_spells.BlockRemover(self, 10)
+
+        self.inventory = self.module_inventory.Inventory(self)
 
         self.move_commands = {
             'forward': (1, -1),
@@ -91,7 +88,7 @@ class Player(Character):
         :param direction: The direction where player wants to move.
         """
         modifier = self.move_commands[direction]
-        self.keyboard_direction[modifier[0]] = modifier[1]
+        self.desired_direction[modifier[0]] = modifier[1]
 
     def update(self, screen, ms, current_chunk):
         """
@@ -109,7 +106,10 @@ class Player(Character):
         """
         pygame.draw.rect(screen, (0, 100, 0), (
             self.pos_onscreen[0], self.pos_onscreen[1], self.world_map_block_size, self.world_map_block_size))
+
         if self.weapon != None: self.weapon.draw(screen)
+
+        self.weapon.update()
         self.collision_detect(current_chunk)
         self.real_pos = [self.real_pos[0] + self.move_direction[0] * self.real_speed * ms,
                          self.real_pos[1] + self.move_direction[1] * self.real_speed * ms]

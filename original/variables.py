@@ -10,7 +10,7 @@ argparser.add_argument('seed', help='sisesta, et genereerida kindel kaart', defa
 args = argparser.parse_args()
 
 
-class Scene_switcher(Exception):
+class SceneSwitcher(Exception):
     def __init__(self, value):
         Exception.__init__(self)
         self.value = value
@@ -24,10 +24,12 @@ class Variables:
         Just a class to store variables. Can be used as a parent class for easy access in every module.
     """
     # MODULES
+    module_main = None
     module_ingame = None
     module_map_generator = None
     module_game_classes = None
     module_spells = None
+    module_inventory = None
 
     game = None
 

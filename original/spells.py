@@ -44,14 +44,17 @@ class Tool(variables.Variables):
 
 
 class BlockRemover(Tool):
-    def __init__(self, owner):
+    def __init__(self, owner, radius):
+        self.radius = radius
         Tool.__init__(self, owner)
 
     def work(self, mouse_click_pos):
-        for dx, dy in itertools.product(range(-1, 2), repeat=2):
-            self.game.map_generator.change_block(
-                ((mouse_click_pos[0] - self.camera_pos[0]) // self.world_map_block_size + dx,
-                 (mouse_click_pos[1] - self.camera_pos[1]) // self.world_map_block_size + dy), 0)
+        if ((mouse_click_pos[0] - self.owner.pos_onscreen[0]) ** 2 + (
+            mouse_click_pos[1] - self.owner.pos_onscreen[1]) ** 2) <= (self.radius * self.world_map_block_size) ** 2:
+            for dx, dy in itertools.product(range(-1, 2), repeat=2):
+                self.game.map_generator.change_block(
+                    ((mouse_click_pos[0] - self.camera_pos[0]) // self.world_map_block_size + dx,
+                     (mouse_click_pos[1] - self.camera_pos[1]) // self.world_map_block_size + dy), 0)
 
 
 
@@ -82,14 +85,14 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.speed_x = self.real_speed * math.cos(angle)
         self.speed_y = self.real_speed * math.sin(angle)
 
-    def update(self, camera_pos):
+    def update(self, camera_pos, ms):
         """
             Update projectile particle position on the map
 
         :param camera_pos: Coordinates of the screen on the map.
         """
-        self.pos[0] += self.speed_x
-        self.pos[1] += self.speed_y
+        self.pos[0] += self.speed_x * ms
+        self.pos[1] += self.speed_y * ms
         self.rect.x = self.pos[0] * self.world_map_block_size + camera_pos[0]
         self.rect.y = self.pos[1] * self.world_map_block_size + camera_pos[1]
         # self.collision_detect()
@@ -169,7 +172,10 @@ class Shotgun(Cannon, variables.Variables):
         self.reload_delay = 600
         self.max_magazine = 7
         self.current_magazine = self.max_magazine
-        self.reloading_time_per_bullet = 1000
+
+        self.reloading = False
+        self.reloading_starttick = 0
+        self.reloading_time_per_bullet = 30
 
     def draw(self, screen):
         for i in range(self.current_magazine):
@@ -177,6 +183,7 @@ class Shotgun(Cannon, variables.Variables):
                                                self.screen_height - 20))
 
     def shoot(self, mouse_click_pos):
+        self.reloading = False
         if self.current_magazine > 0 and pygame.time.get_ticks() - self.starttick > self.shot_delay:
             angle = math.atan2(mouse_click_pos[1] - self.owner.pos_onscreen[1],
                                mouse_click_pos[0] - self.owner.pos_onscreen[0])
@@ -188,14 +195,18 @@ class Shotgun(Cannon, variables.Variables):
 
             # for i in range(0, 101):
             # eval(self.ammo + "({0}, {1})".format(self.owner.pos, i * 2 * math.pi/100))
-            # self.amount_of_ammo -= 3
+            self.amount_of_ammo -= 3
 
-    # def update(self):
-
+    def update(self):
+        if self.reloading and self.current_magazine < self.max_magazine and (
+            pygame.time.get_ticks() - self.reloading_starttick) % self.reloading_time_per_bullet == 0:
+            self.current_magazine += 1
+        elif self.current_magazine >= self.max_magazine:
+            self.reloading = False
 
     def reload(self):
-        start = pygame.time.get_ticks()
-
+        self.reloading_starttick = pygame.time.get_ticks()
+        self.reloading = True
 
 
 class SimpleBullet(Projectile):
