@@ -53,8 +53,8 @@ class BlockRemover(Tool):
             mouse_click_pos[1] - self.owner.pos_onscreen[1]) ** 2) <= (self.radius * self.world_map_block_size) ** 2:
             for dx, dy in itertools.product(range(-1, 2), repeat=2):
                 self.game.map_generator.change_block(
-                    ((mouse_click_pos[0] - self.camera_pos[0]) // self.world_map_block_size + dx,
-                     (mouse_click_pos[1] - self.camera_pos[1]) // self.world_map_block_size + dy), 0)
+                    ((mouse_click_pos[0] - int(self.camera_pos[0])) // self.world_map_block_size + dx,
+                     (mouse_click_pos[1] - int(self.camera_pos[1])) // self.world_map_block_size + dy), 0)
 
 
 
@@ -79,7 +79,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.starttick = pygame.time.get_ticks()
 
         self.lifetime = lifetime
-        self.real_speed = 0.1
+        self.real_speed = 0.04
         self.explode_size = explode_size
 
         self.speed_x = self.real_speed * math.cos(angle)
@@ -197,9 +197,9 @@ class Shotgun(Cannon, variables.Variables):
             # eval(self.ammo + "({0}, {1})".format(self.owner.pos, i * 2 * math.pi/100))
             self.amount_of_ammo -= 3
 
-    def update(self):
+    def update(self, ms):
         if self.reloading and self.current_magazine < self.max_magazine and (
-            pygame.time.get_ticks() - self.reloading_starttick) % self.reloading_time_per_bullet == 0:
+                    pygame.time.get_ticks() - self.reloading_starttick) * ms % self.reloading_time_per_bullet == 0:
             self.current_magazine += 1
         elif self.current_magazine >= self.max_magazine:
             self.reloading = False

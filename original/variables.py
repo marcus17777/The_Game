@@ -32,6 +32,7 @@ class Variables:
     module_inventory = None
 
     game = None
+    # map_generator = None
 
     # SCREEN
     screen_width = 800
@@ -43,8 +44,6 @@ class Variables:
     world_map_height = 64
     world_map_block_size = 16
     world_map_gen_seed = int(args.seed) if args.seed is not None else random.random()
-    map_chunks = {}
-    map_chunk_surfaces = {}
 
     world_map_octaves = 2
     world_map_frequency = 16 * world_map_octaves
@@ -53,6 +52,7 @@ class Variables:
 
     # PARTICLES AND SPELLS
     spell_group = pygame.sprite.Group()
+    npc_group = pygame.sprite.Group()
 
     # MINIMAP
     minimap_width = 150

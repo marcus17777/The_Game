@@ -21,6 +21,7 @@ class Character(variables.Variables):
         """
         if pos == None: self.spawn_randomly()
         self.pos = pos
+        self.real_pos = self.pos
         self.move_direction = [0, 0]
         self.desired_direction = [0, 0]
 
@@ -30,23 +31,26 @@ class Character(variables.Variables):
         while True:
             temp = [random.randint(0, self.screen_width // self.world_map_block_size),
                     random.randint(0, self.screen_height // self.world_map_block_size)]
-            if self.map_generator.map_chunks[map_chunk][temp[1]][temp[0]] == 0:
+            if self.game.map_generator.map_chunks[map_chunk][temp[1]][temp[0]] == 0:
                 self.pos = temp
                 break
 
-    def collision_detect(self, map):
+    def collision_detect(self):
         """
             Collison detection for every character. Allows to move only on certain block on the map.
             Currently in development.
         :param map: The current map (9 chunks - 3x3) where the character is standing on.
         """
-        pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
-                      self.pos[1] % self.world_map_height + self.world_map_height)
+        # pos_on_map = (self.pos[0] % self.world_map_width + self.world_map_width,
+        #               self.pos[1] % self.world_map_height + self.world_map_height)
 
         self.move_direction = [
-            (1 - bool(map[pos_on_map[1]][pos_on_map[0] + self.desired_direction[0]])) * self.desired_direction[0],
-            (1 - bool(map[pos_on_map[1] + self.desired_direction[1]][pos_on_map[0]])) * self.desired_direction[1]]
-        if bool(map[pos_on_map[1] + self.move_direction[1]][pos_on_map[0] + self.move_direction[0]]) == True:
+            (1 - bool(self.game.map_generator.get_block(
+                (self.real_pos[0] + self.desired_direction[0], self.real_pos[1])).state)) * self.desired_direction[0],
+            (1 - bool(self.game.map_generator.get_block(
+                (self.real_pos[0], self.real_pos[1] + self.desired_direction[1])).state)) * self.desired_direction[1]]
+        if bool(self.game.map_generator.get_block(
+                (self.real_pos[0] + self.move_direction[0], self.real_pos[1] + self.move_direction[1])).state) == True:
             self.move_direction = [0, 0]
 
 
@@ -61,8 +65,7 @@ class Player(Character):
         self.color = (255, 0, 0)
         self.size = (self.world_map_block_size, 2 * self.world_map_block_size)
         self.pos_onscreen = [self.screen_width // 2 - self.size[0] / 2, self.screen_height // 2 - self.size[1] / 2]
-        self.real_speed = 0.04
-        self.real_pos = self.pos
+        self.real_speed = 0.02
 
         self.weapon = self.module_spells.Shotgun(self)
         self.weapon.ammo = "SimpleBullet"  # Should be class name of the ammo
@@ -90,7 +93,7 @@ class Player(Character):
         modifier = self.move_commands[direction]
         self.desired_direction[modifier[0]] = modifier[1]
 
-    def update(self, screen, ms, current_chunk):
+    def update(self, screen, ms):
         """
             A function for updating the state and position on the map of the player.
 
@@ -108,9 +111,9 @@ class Player(Character):
             self.pos_onscreen[0], self.pos_onscreen[1], self.world_map_block_size, self.world_map_block_size))
 
         if self.weapon != None: self.weapon.draw(screen)
+        self.weapon.update(ms)
 
-        self.weapon.update()
-        self.collision_detect(current_chunk)
+        self.collision_detect()
         self.real_pos = [self.real_pos[0] + self.move_direction[0] * self.real_speed * ms,
                          self.real_pos[1] + self.move_direction[1] * self.real_speed * ms]
 
@@ -118,3 +121,31 @@ class Player(Character):
         self.pos[1] = round(self.real_pos[1])
 
         # print(self.pos)
+
+
+class NPC(Character, pygame.sprite.Sprite):
+    def __init__(self, pos=None, color=(100, 100, 0)):
+        pygame.sprite.Sprite.__init__(self, variables.Variables.npc_group)
+        Character.__init__(self, pos)
+
+        self.virtual_mouse = [0, 0]
+        self.pos = pos
+
+        self.weapon = None
+        self.ammo = None
+        self.tool = None
+        self.inventory = None
+
+        self.size = (40, 40)
+        self.color = color
+        self.image = pygame.Surface(self.size)
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect()
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
+
+    def update(self):
+        pass
+
+    def draw(self, screen):
+        screen.blit()

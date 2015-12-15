@@ -36,7 +36,7 @@ class Game(variables.Variables, tkinter.Frame):
         """
         tkinter.Frame.__init__(master)
         self.master = master
-        self.map_generator = self.module_map_generator.Map_Generator()
+        self.map_generator = self.module_map_generator.MapGenerator()
         self.mainplayer = self.module_game_classes.Player([self.world_map_width // 2, self.world_map_height // 2])
         # self.minimap = Minimap()
 
@@ -60,14 +60,14 @@ class Game(variables.Variables, tkinter.Frame):
         :param ms: Parameter that is needed for character movement and fps calculation.
         """
         variables.Variables.camera_pos = [(self.screen_width // 2 + self.world_map_block_size // 2) - (
-        self.mainplayer.pos[0] + 1) * self.world_map_block_size,
+            self.mainplayer.real_pos[0] + 1) * self.world_map_block_size,
                                           (self.screen_height // 2 - (
-                                          self.mainplayer.pos[1] + 1) * self.world_map_block_size)]
+                                              self.mainplayer.real_pos[1] + 1) * self.world_map_block_size)]
 
         self.map_generator.blit_all_maps(screen, self.camera_pos)
         self.map_generator.create_new_chunk(self.mainplayer.pos)
         fps_counter(screen, font, ms)
-        self.mainplayer.update(screen, ms, self.map_generator.get_current_chunk())
+        self.mainplayer.update(screen, ms)
         self.spell_group.draw(screen)
         self.spell_group.update(self.camera_pos, ms)
 
