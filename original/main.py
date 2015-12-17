@@ -2,6 +2,7 @@ import tkinter
 import pygame
 import os
 from original import intro_scene
+from original import credits_scene
 from original import menu_scene
 from original import game_scene
 from original import variables
@@ -34,9 +35,9 @@ class Main(variables.Variables):
             'intro': intro_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'menu': menu_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'game': game_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
-            'credits': '',
+            'credits': credits_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
         }
-        self.current_scene = 'game'
+        self.current_scene = 'menu'
         self.fade_rate = 1
         self.fade_surface = pygame.Surface((self.screen_width, self.screen_height))
         self.fade_surface.fill((0, 0, 0))
