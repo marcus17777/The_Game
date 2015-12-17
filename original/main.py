@@ -36,7 +36,7 @@ class Main(variables.Variables):
             'game': game_scene.Main(self.screen, self.font, self.clock, self.ms, self.root),
             'credits': '',
         }
-        self.current_scene = 'menu'
+        self.current_scene = 'game'
         self.fade_rate = 1
         self.fade_surface = pygame.Surface((self.screen_width, self.screen_height))
         self.fade_surface.fill((0, 0, 0))

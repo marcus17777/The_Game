@@ -43,7 +43,7 @@ class MapGenerator(variables.Variables):
                         pos[1] // self.world_map_height)
         pos_on_map = (pos[0] % self.world_map_width,
                       pos[1] % self.world_map_height)
-        print(map_chunk_id, pos_on_map, pos)
+        # print(map_chunk_id, pos_on_map, pos)
         return map_chunk_id, pos_on_map
 
     def blit_all_maps(self, screen, camera_pos):

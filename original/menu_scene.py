@@ -19,6 +19,7 @@ class MenuNode(variables.Variables):
         }
         self.current_state = 0
         self.image = self.images[self.current_state]
+        self.rect = self.image.get_rect()
         self.current_option = 0
 
     def move_between_options(self, direction):
@@ -34,7 +35,7 @@ class MenuNode(variables.Variables):
     def draw_childs(self, surface):
         startpos = (self.screen_width // 2, (self.screen_height - len(self.childs) * 30) // 2)
         for i in range(len(self.childs)):
-            surface.blit(self.childs[i].image, (startpos[0], startpos[1] + i * 30))
+            surface.blit(self.childs[i].image, (startpos[0] - self.childs[i].rect.width // 2, startpos[1] + i * 30))
 
     def update_childs(self):
         for i in range(len(self.childs)):

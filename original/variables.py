@@ -35,8 +35,8 @@ class Variables:
     # map_generator = None
 
     # SCREEN
-    screen_width = 800
-    screen_height = 600
+    screen_width = 1200
+    screen_height = 900
     camera_pos = []
 
     # MAP_GEN
@@ -52,7 +52,7 @@ class Variables:
 
     # PARTICLES AND SPELLS
     spell_group = pygame.sprite.Group()
-    npc_group = pygame.sprite.Group()
+    character_group = pygame.sprite.Group()
 
     # MINIMAP
     minimap_width = 150

@@ -2,6 +2,7 @@ import pygame
 import math
 import itertools
 import operator
+import copy
 from original import variables
 
 __author__ = 'Markus Peterson'
@@ -44,22 +45,22 @@ class Tool(variables.Variables):
 
 
 class BlockRemover(Tool):
-    def __init__(self, owner, radius):
+    def __init__(self, owner, radius, break_radius):
         self.radius = radius
+        self.break_radius = break_radius
         Tool.__init__(self, owner)
 
     def work(self, mouse_click_pos):
         if ((mouse_click_pos[0] - self.owner.pos_onscreen[0]) ** 2 + (
             mouse_click_pos[1] - self.owner.pos_onscreen[1]) ** 2) <= (self.radius * self.world_map_block_size) ** 2:
-            for dx, dy in itertools.product(range(-1, 2), repeat=2):
+            for dx, dy in itertools.product(range(-self.break_radius, self.break_radius + 1), repeat=2):
                 self.game.map_generator.change_block(
                     ((mouse_click_pos[0] - int(self.camera_pos[0])) // self.world_map_block_size + dx,
                      (mouse_click_pos[1] - int(self.camera_pos[1])) // self.world_map_block_size + dy), 0)
 
 
-
 class Projectile(variables.Variables, pygame.sprite.Sprite):
-    def __init__(self, pos, angle, lifetime, explode_size, color=(255, 255, 255)):
+    def __init__(self, parent_weapon, angle, lifetime, explode_size, color=(255, 255, 255)):
         """
             Class that is basically a sprite class that is used to create projectile particles. For ex. a bullet.
 
@@ -69,11 +70,12 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         :param explode_size: Radius that describes the exploding range of the projectile particle when collided with something.
         :param color: Color of the projectile particle
         """
+        self.parent_weapon = parent_weapon
         pygame.sprite.Sprite.__init__(self, variables.Variables.spell_group)
         self.image = pygame.Surface((self.world_map_block_size // 2, self.world_map_block_size // 2))
         self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.pos = pos
+        self.pos = self.parent_weapon.owner.pos[:]
         self.rect.x = 0
         self.rect.y = 0
         self.starttick = pygame.time.get_ticks()
@@ -85,7 +87,7 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         self.speed_x = self.real_speed * math.cos(angle)
         self.speed_y = self.real_speed * math.sin(angle)
 
-    def update(self, camera_pos, ms):
+    def update(self, ms):
         """
             Update projectile particle position on the map
 
@@ -93,20 +95,28 @@ class Projectile(variables.Variables, pygame.sprite.Sprite):
         """
         self.pos[0] += self.speed_x * ms
         self.pos[1] += self.speed_y * ms
-        self.rect.x = self.pos[0] * self.world_map_block_size + camera_pos[0]
-        self.rect.y = self.pos[1] * self.world_map_block_size + camera_pos[1]
-        # self.collision_detect()
+        self.rect.x = self.pos[0] * self.world_map_block_size + self.camera_pos[0]
+        self.rect.y = self.pos[1] * self.world_map_block_size + self.camera_pos[1]
+        self.collision_detect()
         self.delete_on_time()
 
     def destroy(self):
         self.groups()[0].remove(self)
 
     def collision_detect(self):
-        id, coords_on_map = self.game.map_generator.convert_coords(
-            (round(self.pos[1] + self.speed_y), round(self.pos[0] + self.speed_x)))
-        if self.game.map_generator.map_chunks[id][coords_on_map[1]][coords_on_map[0]] != 0:
-            self.explode()
-            self.destroy()
+        # id, coords_on_map = self.game.map_generator.convert_coords(
+        #     (round(self.pos[1] + self.speed_y), round(self.pos[0] + self.speed_x)))
+        # if self.game.map_generator.map_chunks[id][coords_on_map[1]][coords_on_map[0]] != 0:
+        #     self.explode()
+        #     self.destroy()
+        a = pygame.sprite.spritecollideany(self, self.character_group)
+        if a != None:
+            a.hurt_score += 1
+            self.parent_weapon.owner.hit_score += 1
+            if isinstance(self.parent_weapon.owner, self.module_game_classes.Player):
+                for i in a.groups():
+                    i.remove(a)
+                self.destroy()
 
     def delete_on_time(self):
         """
@@ -144,18 +154,25 @@ class SingleShotCannon(Cannon, variables.Variables):
         :param owner: The owner of this weapon.
         """
         Cannon.__init__(self, owner)
+        self.shot_delay = 500
 
-    def shoot(self, mouse_click_pos):
+    def shoot(self, angle):
         """
             Creates instances of the ammo.
 
         :param mouse_click_pos: Mouse position on the map when clicked. Comes from the pygame event loop.
         """
-        if self.amount_of_ammo > 0:
-            eval(self.ammo + "({0}, {1})".format(self.owner.pos,
-                                                 math.atan2(mouse_click_pos[1] - self.owner.pos_onscreen[1],
-                                                            mouse_click_pos[0] - self.owner.pos_onscreen[0])))
-            self.amount_of_ammo -= 1
+        if (
+                self.amount_of_ammo > 0 or self.amount_of_ammo == -1) and pygame.time.get_ticks() - self.starttick > self.shot_delay:
+            eval(self.ammo + "(self, {0})".format(angle))
+            self.starttick = pygame.time.get_ticks()
+            if self.amount_of_ammo != -1: self.amount_of_ammo -= 1
+
+    def draw(self, screen):
+        pass
+
+    def update(self, screen):
+        pass
 
 
 class Shotgun(Cannon, variables.Variables):
@@ -182,15 +199,13 @@ class Shotgun(Cannon, variables.Variables):
             screen.blit(self.cartridge_image, (self.screen_width - (self.max_magazine - i) * (self.image_rect[2] + 20),
                                                self.screen_height - 20))
 
-    def shoot(self, mouse_click_pos):
+    def shoot(self, angle):
         self.reloading = False
         if self.current_magazine > 0 and pygame.time.get_ticks() - self.starttick > self.shot_delay:
-            angle = math.atan2(mouse_click_pos[1] - self.owner.pos_onscreen[1],
-                               mouse_click_pos[0] - self.owner.pos_onscreen[0])
             self.starttick = pygame.time.get_ticks()
-            eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle - math.pi / 15))
-            eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle))
-            eval(self.ammo + "({0}, {1})".format(self.owner.pos, angle + math.pi / 15))
+            eval(self.ammo + "(self, {0})".format(angle - math.pi / 15))
+            eval(self.ammo + "(self, {0})".format(angle))
+            eval(self.ammo + "(self, {0})".format(angle + math.pi / 15))
             self.current_magazine -= 1
 
             # for i in range(0, 101):
@@ -212,3 +227,18 @@ class Shotgun(Cannon, variables.Variables):
 class SimpleBullet(Projectile):
     def __init__(self, pos, mouse_click_pos):
         Projectile.__init__(self, pos, mouse_click_pos, 1000, 3, (255, 255, 255))
+
+
+class SpectatorGun(variables.Variables):
+    def __init__(self, owner):
+        self.owner = owner
+        self.next_index = 0
+
+    def shoot(self, pos):
+        try:
+            self.owner.pos = list(self.character_group)[self.next_index].pos
+
+            self.next_index = (self.next_index + 1) % (len(list(self.character_group)) - 1)
+        except Exception as e:
+            print(e)
+            pass

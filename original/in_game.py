@@ -43,6 +43,10 @@ class Game(variables.Variables, tkinter.Frame):
         # Create frame
         self.frame = tkinter.Frame(master=self.master)
         self.frame.pack(side='right')
+        self.starttick = pygame.time.get_ticks()
+
+        for i in range(10):
+            self.module_game_classes.NPC(4, 20, pos=[self.world_map_width // 2, self.world_map_height // 2])
 
     def get_vars(self):
         """
@@ -60,16 +64,21 @@ class Game(variables.Variables, tkinter.Frame):
         :param ms: Parameter that is needed for character movement and fps calculation.
         """
         variables.Variables.camera_pos = [(self.screen_width // 2 + self.world_map_block_size // 2) - (
-            self.mainplayer.real_pos[0] + 1) * self.world_map_block_size,
+        self.mainplayer.real_pos[0] + 1) * self.world_map_block_size,
                                           (self.screen_height // 2 - (
-                                              self.mainplayer.real_pos[1] + 1) * self.world_map_block_size)]
+                                          self.mainplayer.real_pos[1] + 1) * self.world_map_block_size)]
 
         self.map_generator.blit_all_maps(screen, self.camera_pos)
         self.map_generator.create_new_chunk(self.mainplayer.pos)
         fps_counter(screen, font, ms)
         self.mainplayer.update(screen, ms)
         self.spell_group.draw(screen)
-        self.spell_group.update(self.camera_pos, ms)
+        self.character_group.draw(screen)
+        self.spell_group.update(ms)
+        self.character_group.update(ms)
+
+        # if (pygame.time.get_ticks() - self.starttick) % 2000 == 0:
+        #     self.module_game_classes.NPC.learn()
 
     def on_event(self, event, screen):
         """
@@ -113,7 +122,7 @@ class Game(variables.Variables, tkinter.Frame):
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # print(event)
             if event.button == 1:
-                self.mainplayer.weapon.shoot(event.pos)
+                self.mainplayer.shoot(event.pos)
                 # pass
             elif event.button == 3:
                 self.mainplayer.tool.work(event.pos)
