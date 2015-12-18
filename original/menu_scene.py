@@ -59,9 +59,10 @@ class Main(variables.Variables):
             MenuNode(self.font, 'Play game', command=lambda: self.change_scene('game')),
             MenuNode(self.font, 'Intro', command=lambda: self.change_scene('intro')),
             MenuNode(self.font, 'Options', childs=[
-                MenuNode(self.font, 'A'),
-                MenuNode(self.font, 'B'),
-                MenuNode(self.font, 'C')
+                MenuNode(self.font, 'Lihtsalt'),
+                MenuNode(self.font, 'Menüü'),
+                MenuNode(self.font, 'Töötamise'),
+                MenuNode(self.font, 'Kontroll')
             ]),
             MenuNode(self.font, 'Credits', command=lambda: self.change_scene('credits')),
             MenuNode(self.font, 'Exit', command=lambda: self.exit_game())
