@@ -114,7 +114,7 @@ class Player(Character):
         self.weapon.ammo = "SimpleBullet"  # Should be class name of the ammo
         self.weapon.amount_of_ammo = 1000
 
-        self.tool = self.module_spells.BlockRemover(self, 10, 3)
+        self.tool = self.module_spells.BlockRemover(self, 1000000000000000000, 3)
 
         self.inventory = self.module_inventory.Inventory(self)
 
@@ -186,7 +186,7 @@ class ML(variables.Variables):
 
 
 class NPC(ML, Character, pygame.sprite.Sprite):
-    def __init__(self, sectors, vision_radius, pos=None, color=(255, 255, 255)):
+    def __init__(self, sectors, vision_radius, pos=None, color=None):
         pygame.sprite.Sprite.__init__(self, variables.Variables.character_group)
         Character.__init__(self, pos)
 
@@ -204,7 +204,8 @@ class NPC(ML, Character, pygame.sprite.Sprite):
         self.inventory = None
 
         self.size = (self.world_map_block_size * 2, self.world_map_block_size * 2)
-        self.color = color
+        self.color = color if color != None else (
+        random.randrange(0, 256), random.randrange(0, 256), random.randrange(0, 256))
         self.image = pygame.Surface(self.size)
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
@@ -233,7 +234,6 @@ class NPC(ML, Character, pygame.sprite.Sprite):
         self.real_pos[1] += (hypothesis[1] * self.move_direction[1]) * 0.01 * ms
 
         self.pos = list(map(round, self.real_pos))
-        self.weapon.shoot(hypothesis[1] / hypothesis[0])
 
         if hypothesis[2] > 0:
             self.weapon.shoot(math.atan2(hypothesis[1], hypothesis[0]))

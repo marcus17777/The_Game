@@ -35,8 +35,8 @@ class Variables:
     # map_generator = None
 
     # SCREEN
-    screen_width = 1200
-    screen_height = 900
+    screen_width = 800
+    screen_height = 600
     camera_pos = []
 
     # MAP_GEN

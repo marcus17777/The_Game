@@ -20,7 +20,7 @@ class Inventory(variables.Variables):
         self.owner = owner
         self.items = []
 
-        self.backround = pygame.transform.scale(pygame.image.load('minecraft_inventory_window.jpg'), (400, 400))
+        self.backround = pygame.transform.scale(pygame.image.load('pics/minecraft_inventory_window.jpg'), (400, 400))
         # First tile (20, 372), (96, 439)
         self.rect = self.backround.get_rect()
         self.rect.x = (self.screen_width - self.rect.width) // 2

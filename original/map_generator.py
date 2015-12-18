@@ -1,6 +1,6 @@
 import operator
 import os
-import noise
+from original import noise
 import pygame
 import itertools
 from original import variables

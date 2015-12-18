@@ -46,7 +46,7 @@ class Game(variables.Variables, tkinter.Frame):
         self.starttick = pygame.time.get_ticks()
 
         for i in range(10):
-            self.module_game_classes.NPC(4, 20, pos=[self.world_map_width // 2, self.world_map_height // 2])
+            self.module_game_classes.NPC(30, 20, pos=[self.world_map_width // 2, self.world_map_height // 2])
 
     def get_vars(self):
         """
@@ -77,8 +77,8 @@ class Game(variables.Variables, tkinter.Frame):
         self.spell_group.update(ms)
         self.character_group.update(ms)
 
-        # if (pygame.time.get_ticks() - self.starttick) % 2000 == 0:
-        #     self.module_game_classes.NPC.learn()
+        if (pygame.time.get_ticks() - self.starttick) % 2000 == 0:
+            self.module_game_classes.NPC.learn()
 
     def on_event(self, event, screen):
         """
