@@ -226,7 +226,7 @@ class Shotgun(Cannon, variables.Variables):
 
 class SimpleBullet(Projectile):
     def __init__(self, parent, angle):
-        Projectile.__init__(self, parent, angle, 1000, 3, (255, 255, 255))
+        Projectile.__init__(self, parent, angle, 300, 3, (255, 255, 255))
 
 
 class SpectatorGun(variables.Variables):

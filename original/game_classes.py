@@ -152,6 +152,7 @@ class Player(Character):
 
 class ML(variables.Variables):
     epoch = 0
+    current_epoch_start_tick = pygame.time.get_ticks()
 
     def __init__(self, number_of_inputs, number_of_outputs):
         self.input = []

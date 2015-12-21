@@ -77,8 +77,10 @@ class Game(variables.Variables, tkinter.Frame):
         self.spell_group.update(ms)
         self.character_group.update(ms)
 
-        if (pygame.time.get_ticks() - self.starttick) % 2000 == 0:
+        # See peaks panema NPC karakterid õppima.
+        if (pygame.time.get_ticks() - self.module_game_classes.ML.current_epoch_start_tick) >= 8000:
             self.module_game_classes.NPC.learn()
+            self.module_game_classes.ML.current_epoch_start_tick = pygame.time.get_ticks()
 
     def on_event(self, event, screen):
         """
