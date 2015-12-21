@@ -54,7 +54,7 @@ class Main(variables.Variables):
                     # self.game.get_vars()
                     self.game.on_event(event, self.screen)
 
-            self.ms = self.clock.tick(300)
+            self.ms = self.clock.tick(100)
             self.screen.fill((80, 80, 80))
             self.game.map_draw(self.screen, self.font, self.ms)
             pygame.display.flip()
